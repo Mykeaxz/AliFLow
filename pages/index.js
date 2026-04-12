@@ -62,7 +62,7 @@ function LoginScreen({ onLogin }) {
 }
 
 // ── BrandForm ─────────────────────────────────────────────────────
-const EMPTY_BRAND = { id:'', name:'', tagline:'', niche:'', story:'', targetCustomer:'', tone:'', keyBenefits:'', alwaysEmphasise:'', copyRules:'', forbiddenWords:'', currency:'AUD', priceMin:'', priceMax:'', priceMultiplier:'4', competitorContext:'', imageStyle:'' };
+const EMPTY_BRAND = { id:'', name:'', tagline:'', niche:'', story:'', targetCustomer:'', tone:'', keyBenefits:'', alwaysEmphasise:'', copyRules:'', forbiddenWords:'', currency:'AUD', priceMin:'', priceMax:'', priceMultiplier:'4', competitorContext:'', imageStyle:'', colorBg:'#ffffff', colorAccent:'#000000', colorText:'#000000' };
 
 function BrandForm({ initial, onSave, onCancel }) {
   const [form, setForm] = useState(initial || EMPTY_BRAND);
@@ -128,9 +128,35 @@ function BrandForm({ initial, onSave, onCancel }) {
         <div className="bf-row"><label>Max Retail Price</label><input className="bf-input" type="number" placeholder="e.g. 199" value={form.priceMax} onChange={e => set('priceMax', e.target.value)} /></div>
       </div>
 
-      <div className="bf-section-title">Image Style</div>
+      <div className="bf-section-title">Visual Style & Colors</div>
       <div className="bf-row"><label>Image / Visual Style <span className="bf-hint-inline">— Claude uses this to write Lovart prompts</span></label>
         <textarea className="bf-input" rows={2} placeholder="e.g. Warm beige and cream tones. Soft natural light. Real people in relaxed home settings. No white studio backgrounds. No stock photo feel." value={form.imageStyle} onChange={e => set('imageStyle', e.target.value)} />
+      </div>
+      <div className="bf-row">
+        <label>Brand Colors <span className="bf-hint-inline">— used in every Lovart image prompt for consistent visuals</span></label>
+        <div className="bf-colors">
+          <div className="bf-color-item">
+            <input type="color" className="bf-color-swatch" value={form.colorBg} onChange={e => set('colorBg', e.target.value)} />
+            <div>
+              <div className="bf-color-label">Background</div>
+              <input className="bf-input bf-color-hex" placeholder="#ffffff" value={form.colorBg} onChange={e => set('colorBg', e.target.value)} />
+            </div>
+          </div>
+          <div className="bf-color-item">
+            <input type="color" className="bf-color-swatch" value={form.colorAccent} onChange={e => set('colorAccent', e.target.value)} />
+            <div>
+              <div className="bf-color-label">Accent / Primary</div>
+              <input className="bf-input bf-color-hex" placeholder="#000000" value={form.colorAccent} onChange={e => set('colorAccent', e.target.value)} />
+            </div>
+          </div>
+          <div className="bf-color-item">
+            <input type="color" className="bf-color-swatch" value={form.colorText} onChange={e => set('colorText', e.target.value)} />
+            <div>
+              <div className="bf-color-label">Text / Dark</div>
+              <input className="bf-input bf-color-hex" placeholder="#000000" value={form.colorText} onChange={e => set('colorText', e.target.value)} />
+            </div>
+          </div>
+        </div>
       </div>
 
       {err && <div className="bf-err">{err}</div>}
@@ -431,6 +457,11 @@ export default function App() {
         .bf-input::placeholder{color:#cbd5e1}
         .bf-err{background:#fee2e2;color:#dc2626;border-radius:8px;padding:10px 14px;font-size:.84rem}
         .bf-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
+        .bf-colors{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:4px}
+        .bf-color-item{display:flex;align-items:flex-start;gap:8px}
+        .bf-color-swatch{width:38px;height:38px;border-radius:8px;border:1.5px solid #e2e8f0;cursor:pointer;padding:2px;background:none;flex-shrink:0;margin-top:18px}
+        .bf-color-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:4px}
+        .bf-color-hex{font-size:.8rem!important;padding:6px 8px!important;font-family:monospace!important}
 
         .img-modal{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
         .img-modal img{max-width:100%;max-height:90vh;border-radius:10px;object-fit:contain}

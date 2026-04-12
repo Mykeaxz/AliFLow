@@ -82,11 +82,18 @@ ${brand.priceMax ? `- Maximum retail price: ${brand.currency || 'AUD'} ${brand.p
 
 ${brand.imageStyle ? `IMAGE / VISUAL STYLE:\n${brand.imageStyle}\n` : ''}
 
+BRAND COLORS — use these consistently in every Lovart prompt:
+- Background color: ${brand.colorBg || '#ffffff'}
+- Accent / Primary color: ${brand.colorAccent || '#000000'}
+- Text color: ${brand.colorText || '#000000'}
+
 LOVART IMAGE PROMPT RULES — apply to every image prompt:
 - Always start every prompt with: "IMPORTANT: Use the uploaded product reference image. Recreate that exact product — do not change any feature of the product."
 - For lifestyle/person shots: "The person must be visibly using and enjoying the product in a natural, relaxed way"
-- Text overlays: bold, modern sans-serif — NEVER thin grey text
-- No irrelevant props or clutter. No white studio backgrounds unless that's the brand style.
+- Text overlays: bold, modern sans-serif in ${brand.colorText || 'brand text color'} — NEVER thin grey text
+- Background should use ${brand.colorBg || 'brand background color'} where applicable
+- Accent elements and highlights should use ${brand.colorAccent || 'brand accent color'}
+- No irrelevant props or clutter. No white studio backgrounds unless that matches the brand color.
 - Consistent brand colours throughout all shots.
 - All shots: 1080x1080px square format.
 
