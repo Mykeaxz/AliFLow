@@ -11,6 +11,8 @@ const loadBrands      = (p) => ls.get(wsKey(p, 'brands'), []);
 const saveBrands      = (p, v) => ls.set(wsKey(p, 'brands'), v);
 const loadActiveBrand = (p) => ls.get(wsKey(p, 'active_brand'), null);
 const saveActiveBrand = (p, v) => ls.set(wsKey(p, 'active_brand'), v);
+const loadProducts    = (p) => ls.get(wsKey(p, 'products'), []);
+const saveProducts    = (p, v) => ls.set(wsKey(p, 'products'), v);
 
 // ── Page template presets ─────────────────────────────────────────
 const PAGE_PRESETS = {
@@ -399,6 +401,50 @@ input:focus,textarea:focus,select:focus{background:#fff!important;box-shadow:0 0
 .tmpl-row.checked .tmpl-type-badge{background:#dbeafe;color:#2563eb}
 .no-tmpl-banner{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;font-size:.84rem;color:#1d4ed8;display:flex;align-items:center;gap:12px;margin-bottom:10px}
 .no-tmpl-btn{margin-left:auto;background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0}
+
+/* ── STATUS BADGES ── */
+.status-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .12s;border:1px solid transparent}
+.status-badge.draft{background:#f1f5f9;color:#64748b;border-color:#e2e8f0}
+.status-badge.ready{background:#fef3c7;color:#92400e;border-color:#fcd34d}
+.status-badge.added{background:#dcfce7;color:#166534;border-color:#86efac}
+
+/* ── PRODUCT CARDS ── */
+.product-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(15,23,42,.05);margin-bottom:8px;transition:all .12s;cursor:pointer}
+.product-card:hover{border-color:#bfdbfe;box-shadow:0 4px 16px rgba(15,23,42,.09)}
+.product-thumb{width:52px;height:52px;border-radius:9px;background:#f1f5f9;border:1px solid #e2e8f0;object-fit:cover;flex-shrink:0}
+.product-thumb-empty{width:52px;height:52px;border-radius:9px;background:#f8fafc;border:1px solid #e2e8f0;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#cbd5e1}
+.product-info{flex:1;min-width:0}
+.product-title{font-size:.88rem;font-weight:700;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.product-meta{font-size:.72rem;color:#94a3b8;margin-top:2px}
+.product-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+
+/* ── BRAND BAR (generate view) ── */
+.brand-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:14px}
+.brand-bar-dot{width:8px;height:8px;background:linear-gradient(135deg,#1d4ed8,#3b82f6);border-radius:50%;flex-shrink:0}
+.brand-bar-label{font-size:.72rem;color:#94a3b8;font-weight:600}
+.brand-bar-name{font-size:.84rem;font-weight:700;color:#0f172a;flex:1}
+.brand-bar-change{font-size:.74rem;font-weight:600;color:#2563eb;background:none;border:none;cursor:pointer;font-family:inherit;padding:0}
+.brand-bar-change:hover{text-decoration:underline}
+
+/* ── FILTER TABS ── */
+.filter-tabs{display:flex;gap:4px;margin-bottom:16px;background:#f1f5f9;border-radius:9px;padding:3px}
+.filter-tab{padding:6px 14px;border-radius:7px;border:none;background:none;font-size:.8rem;font-weight:600;color:#64748b;cursor:pointer;font-family:inherit;transition:all .12s}
+.filter-tab.active{background:#fff;color:#0f172a;box-shadow:0 1px 3px rgba(15,23,42,.08)}
+
+/* ── SIDEBAR COUNT BADGES ── */
+.sb-count{font-size:.65rem;font-weight:700;background:#f1f5f9;color:#94a3b8;padding:1px 7px;border-radius:999px;margin-left:auto}
+.sb-item.active .sb-count{background:#dbeafe;color:#2563eb}
+
+/* ── PRODUCT DETAIL ── */
+.detail-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:20px}
+.detail-back{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:600;color:#64748b;background:none;border:none;cursor:pointer;font-family:inherit;padding:0;margin-bottom:14px}
+.detail-back:hover{color:#0f172a}
+.detail-title{font-size:1.3rem;font-weight:800;letter-spacing:-.025em;color:#0f172a;flex:1}
+.detail-meta-row{display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap}
+.detail-brand-pill{font-size:.72rem;font-weight:700;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;padding:3px 10px;border-radius:999px}
+.detail-notes{width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:.84rem;font-family:inherit;color:#0f172a;outline:none;resize:vertical;background:#f8fafc;transition:all .15s;margin-top:4px}
+.detail-notes:focus{border-color:#3b82f6;background:#fff;box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+.detail-notes::placeholder{color:#cbd5e1}
 `;
 
 // ── LoginScreen ───────────────────────────────────────────────────
@@ -445,7 +491,14 @@ function LoginScreen({ onLogin }) {
 }
 
 // ── BrandForm ─────────────────────────────────────────────────────
-const EMPTY_BRAND = { id: '', name: '', tagline: '', niche: '', story: '', targetCustomer: '', tone: '', keyBenefits: '', alwaysEmphasise: '', copyRules: '', forbiddenWords: '', currency: 'AUD', priceMin: '', priceMax: '', priceMultiplier: '4', competitorContext: '', imageStyle: '', colorBg: '#ffffff', colorAccent: '#000000', colorText: '#000000', pageTemplate: [], faqCount: 5 };
+const DEFAULT_GEN_CONFIG = {
+  inclTitle: true,
+  inclContent: true,
+  inclImages: true,
+  shots: DEFAULT_SHOTS.map((t, i) => ({ id: i, type: t })),
+  faqCount: 5,
+};
+const EMPTY_BRAND = { id: '', name: '', tagline: '', niche: '', story: '', targetCustomer: '', tone: '', keyBenefits: '', alwaysEmphasise: '', copyRules: '', forbiddenWords: '', currency: 'AUD', priceMin: '', priceMax: '', priceMultiplier: '4', competitorContext: '', imageStyle: '', colorBg: '#ffffff', colorAccent: '#000000', colorText: '#000000', pageTemplate: [], faqCount: 5, genConfig: { ...DEFAULT_GEN_CONFIG } };
 
 function BrandForm({ initial, onSave, onCancel }) {
   const [form, setForm] = useState(initial || EMPTY_BRAND);
@@ -512,13 +565,6 @@ function BrandForm({ initial, onSave, onCancel }) {
         <input className="bf-input" placeholder="e.g. We compete with X and Y. We're better because our products are higher quality at a lower price." value={form.competitorContext} onChange={e => set('competitorContext', e.target.value)} />
       </div>
 
-      <div className="bf-section-title">Pricing</div>
-      <div className="bf-grid3">
-        <div className="bf-row"><label>Price Multiplier <span className="bf-hint-inline">× cost = retail</span></label><input className="bf-input" type="number" step="0.5" min="1" placeholder="4" value={form.priceMultiplier} onChange={e => set('priceMultiplier', e.target.value)} /></div>
-        <div className="bf-row"><label>Min Retail Price</label><input className="bf-input" type="number" placeholder="e.g. 29" value={form.priceMin} onChange={e => set('priceMin', e.target.value)} /></div>
-        <div className="bf-row"><label>Max Retail Price</label><input className="bf-input" type="number" placeholder="e.g. 199" value={form.priceMax} onChange={e => set('priceMax', e.target.value)} /></div>
-      </div>
-
       <div className="bf-section-title">Visual Style & Colors</div>
       <div className="bf-row">
         <label>Image / Visual Style <span className="bf-hint-inline">— Claude uses this to write Lovart prompts</span></label>
@@ -550,6 +596,73 @@ function BrandForm({ initial, onSave, onCancel }) {
           </div>
         </div>
       </div>
+
+      <div className="bf-section-title">Generation Config</div>
+      <div style={{fontSize:'.78rem',color:'#64748b',marginBottom:8}}>Configure what gets generated for every product in this brand. Set it once, use it every time.</div>
+      {(() => {
+        const gc = form.genConfig || { ...DEFAULT_GEN_CONFIG };
+        const setGc = (k, v) => set('genConfig', { ...gc, [k]: v });
+        const gcShots = gc.shots && gc.shots.length > 0 ? gc.shots : DEFAULT_GEN_CONFIG.shots;
+        const addGcShot = () => setGc('shots', [...gcShots, { id: Date.now(), type: 'auto' }]);
+        const removeGcShot = (id) => setGc('shots', gcShots.filter(s => s.id !== id));
+        const setGcShotType = (id, type) => setGc('shots', gcShots.map(s => s.id === id ? { ...s, type } : s));
+        return (
+          <>
+            <div style={{display:'flex',flexDirection:'column',gap:6,marginBottom:10}}>
+              {[
+                { key: 'inclTitle', label: 'Product Title', desc: 'Generate a branded product title and pain point' },
+                { key: 'inclContent', label: 'Page Content', desc: 'Generate page sections (requires template below)' },
+                { key: 'inclImages', label: 'Image Prompts', desc: 'Generate Lovart image prompts' },
+              ].map(({ key, label, desc }) => (
+                <div key={key} className={`gen-opt${gc[key] ? ' checked' : ''}`} onClick={() => setGc(key, !gc[key])}>
+                  <div className="gen-opt-cb">{gc[key] && <IcoOk />}</div>
+                  <div><div className="gen-opt-label">{label}</div><div className="gen-opt-desc">{desc}</div></div>
+                </div>
+              ))}
+            </div>
+            {gc.inclImages && (
+              <>
+                <div style={{fontSize:'.74rem',fontWeight:700,color:'#475569',marginBottom:6}}>Image Prompt Shots <span style={{fontWeight:400,color:'#94a3b8'}}>— default shot list for this brand</span></div>
+                <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
+                  <div className="qty-stepper">
+                    <button className="qty-btn" onClick={() => gcShots.length > 1 && removeGcShot(gcShots[gcShots.length-1].id)} disabled={gcShots.length <= 1}>−</button>
+                    <div className="qty-val">{gcShots.length}</div>
+                    <button className="qty-btn" onClick={addGcShot} disabled={gcShots.length >= 10}>+</button>
+                  </div>
+                  <span style={{fontSize:'.78rem',color:'#94a3b8'}}>shots</span>
+                </div>
+                <div className="shot-slots">
+                  {gcShots.map((shot, i) => {
+                    const typeInfo = SHOT_TYPES.find(t => t.id === shot.type) || SHOT_TYPES[0];
+                    return (
+                      <div key={shot.id} className="shot-slot">
+                        <div className="shot-num">{i+1}</div>
+                        <div className="shot-type-wrap">
+                          <select className={`shot-type-select${shot.type === 'auto' ? ' is-auto' : ''}`} value={shot.type} onChange={e => setGcShotType(shot.id, e.target.value)}>
+                            {SHOT_TYPES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+                          </select>
+                        </div>
+                        <div className="shot-desc">{typeInfo.desc}</div>
+                        <button className="shot-remove" onClick={() => removeGcShot(shot.id)} disabled={gcShots.length <= 1}>×</button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+            {form.pageTemplate.some(s => s.type === 'faq') && (
+              <div className="faq-count-row" style={{marginTop:8}}>
+                <div className="faq-count-label">FAQ pairs (genConfig)</div>
+                <div className="qty-stepper">
+                  <button className="qty-btn" onClick={() => setGc('faqCount', Math.max(1, (gc.faqCount||5)-1))}>−</button>
+                  <div className="qty-val">{gc.faqCount||5}</div>
+                  <button className="qty-btn" onClick={() => setGc('faqCount', Math.min(20, (gc.faqCount||5)+1))}>+</button>
+                </div>
+              </div>
+            )}
+          </>
+        );
+      })()}
 
       <div className="bf-section-title">Product Page Template</div>
       <div style={{fontSize:'.78rem',color:'#64748b',marginBottom:8}}>Build your page section by section — in the exact order they appear on your store. Claude will generate content for each one.</div>
@@ -589,17 +702,6 @@ function BrandForm({ initial, onSave, onCancel }) {
       <button className="pt-add" onClick={() => set('pageTemplate', [...form.pageTemplate, makeSection({name:'',type:'text',description:''})])}>
         <IcoPlus /> Add section
       </button>
-
-      {form.pageTemplate.some(s => s.type === 'faq') && (
-        <div className="faq-count-row">
-          <div className="faq-count-label">Number of FAQ pairs to generate</div>
-          <div className="qty-stepper">
-            <button className="qty-btn" onClick={() => set('faqCount', Math.max(1, (form.faqCount||5)-1))}>−</button>
-            <div className="qty-val">{form.faqCount||5}</div>
-            <button className="qty-btn" onClick={() => set('faqCount', Math.min(20, (form.faqCount||5)+1))}>+</button>
-          </div>
-        </div>
-      )}
 
       {err && <div className="bf-err">{err}</div>}
       <div className="bf-actions">
@@ -828,10 +930,16 @@ export default function App() {
   const [editingBrand, setEditingBrand]   = useState(null);
   const [showSettings, setShowSettings]   = useState(false);
 
+  // Products state
+  const [products, setProducts]           = useState([]);
+  const [productFilter, setProductFilter] = useState('all'); // 'all'|'draft'|'ready'|'added'
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
   // Generate state
   const [url, setUrl]                       = useState('');
   const [notes, setNotes]                   = useState('');
   const [inclTitle, setInclTitle]           = useState(true);
+  const [inclContent, setInclContent]       = useState(true);
   const [selectedSections, setSelectedSections] = useState([]); // template section ids
   const [imgEnabled, setImgEnabled]         = useState(true);
   const [imgShots, setImgShots]             = useState(() => DEFAULT_SHOTS.map((t,i) => ({ id: i, type: t })));
@@ -851,15 +959,24 @@ export default function App() {
     const a = loadActiveBrand(profile);
     if (a && b.find(x => x.id === a)) setActiveBrandId(a);
     else if (b.length > 0) { setActiveBrandId(b[0].id); saveActiveBrand(profile, b[0].id); }
+    const prods = loadProducts(profile); setProducts(prods);
   }, [profile]);
-  // Auto-select all template sections when active brand changes
+
+  // Init generate state from active brand's genConfig when brand changes
   useEffect(() => {
     const brand = brands.find(b => b.id === activeBrandId);
+    if (!brand) return;
+    const gc = brand.genConfig || DEFAULT_GEN_CONFIG;
+    setInclTitle(gc.inclTitle !== false);
+    setInclContent(gc.inclContent !== false);
+    setImgEnabled(gc.inclImages !== false);
+    const shots = gc.shots && gc.shots.length > 0 ? gc.shots : DEFAULT_SHOTS.map((t, i) => ({ id: i, type: t }));
+    setImgShots(shots);
     if (brand?.pageTemplate?.length) setSelectedSections(brand.pageTemplate.map(s => s.id));
   }, [activeBrandId, brands]);
 
   const login  = (name) => { ls.set('aliflow_profile', name); setProfile(name); };
-  const logout = () => { ls.set('aliflow_profile', null); setProfile(null); setBrands([]); setActiveBrandId(null); setShowSettings(false); };
+  const logout = () => { ls.set('aliflow_profile', null); setProfile(null); setBrands([]); setActiveBrandId(null); setProducts([]); setShowSettings(false); };
   const activeBrand = brands.find(b => b.id === activeBrandId) || null;
 
   const saveBrand = (brand) => {
@@ -877,7 +994,68 @@ export default function App() {
     if (activeBrandId === id) { const n = next[0]?.id || null; setActiveBrandId(n); saveActiveBrand(profile, n); }
   };
 
-  const toggleSel = (id) => setSelections(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  const cycleStatus = (status) => {
+    if (status === 'draft') return 'ready';
+    if (status === 'ready') return 'added';
+    return 'draft';
+  };
+
+  const updateProductStatus = (id, newStatus) => {
+    const next = products.map(p => p.id === id ? { ...p, status: newStatus } : p);
+    setProducts(next); saveProducts(profile, next);
+    if (selectedProduct?.id === id) setSelectedProduct(prev => ({ ...prev, status: newStatus }));
+  };
+
+  const deleteProduct = (id) => {
+    if (!confirm('Delete this product?')) return;
+    const next = products.filter(p => p.id !== id);
+    setProducts(next); saveProducts(profile, next);
+    if (selectedProduct?.id === id) { setSelectedProduct(null); setView('products'); }
+  };
+
+  const saveProduct = () => {
+    if (!result || !activeBrand) return;
+    const prod = {
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+      brandId: activeBrand.id,
+      brandName: activeBrand.name,
+      url,
+      title: result.productName || 'Untitled',
+      painPoint: result.painPoint || '',
+      images,
+      result,
+      status: 'draft',
+      notes: '',
+    };
+    const next = [prod, ...products];
+    setProducts(next); saveProducts(profile, next);
+    reset();
+  };
+
+  const updateProductNotes = (id, notes) => {
+    const next = products.map(p => p.id === id ? { ...p, notes } : p);
+    setProducts(next); saveProducts(profile, next);
+    if (selectedProduct?.id === id) setSelectedProduct(prev => ({ ...prev, notes }));
+  };
+
+  const updateProductResult = (id, key, val) => {
+    const next = products.map(p => {
+      if (p.id !== id) return p;
+      return { ...p, result: { ...p.result, [key]: val } };
+    });
+    setProducts(next); saveProducts(profile, next);
+    if (selectedProduct?.id === id) setSelectedProduct(prev => ({ ...prev, result: { ...prev.result, [key]: val } }));
+  };
+
+  const updateProductPageSection = (id, secKey, val) => {
+    const next = products.map(p => {
+      if (p.id !== id) return p;
+      return { ...p, result: { ...p.result, pageContent: { ...p.result.pageContent, [secKey]: val } } };
+    });
+    setProducts(next); saveProducts(profile, next);
+    if (selectedProduct?.id === id) setSelectedProduct(prev => ({ ...prev, result: { ...prev.result, pageContent: { ...prev.result.pageContent, [secKey]: val } } }));
+  };
 
   const addShot = (type = 'auto') => setImgShots(prev => [...prev, { id: Date.now(), type }]);
   const removeShot = (id) => setImgShots(prev => prev.filter(s => s.id !== id));
@@ -885,7 +1063,7 @@ export default function App() {
 
   const generate = async () => {
     const hasTemplate = activeBrand?.pageTemplate?.length > 0;
-    const hasContent  = hasTemplate ? selectedSections.length > 0 : false;
+    const hasContent  = inclContent && hasTemplate ? selectedSections.length > 0 : false;
     const total = (inclTitle ? 1 : 0) + (hasContent ? 1 : 0) + (imgEnabled && imgShots.length > 0 ? 1 : 0);
     if (!url.trim() || !url.includes('aliexpress.com')) return setError('Please paste a valid AliExpress product URL');
     if (!activeBrand) return setError('Set up a brand first');
@@ -971,10 +1149,29 @@ export default function App() {
               <span className="sb-item-icon"><IcoSpark /></span>
               Generate
             </button>
-            <button className={`sb-item${view === 'history' ? ' active' : ''}`} onClick={() => setView('history')}>
-              <span className="sb-item-icon"><IcoClock /></span>
-              History
-            </button>
+          </div>
+
+          <div className="sb-divider" />
+
+          {/* PRODUCTS section */}
+          <div className="sb-section">
+            <div className="sb-label">Products</div>
+            {[
+              { label: 'All Products', filter: 'all', count: products.length },
+              { label: 'Draft',        filter: 'draft', count: products.filter(p=>p.status==='draft').length },
+              { label: 'Ready',        filter: 'ready', count: products.filter(p=>p.status==='ready').length },
+              { label: 'Added to Store', filter: 'added', count: products.filter(p=>p.status==='added').length },
+            ].map(({ label, filter, count }) => (
+              <button
+                key={filter}
+                className={`sb-item${view === 'products' && productFilter === filter ? ' active' : ''}`}
+                onClick={() => { setView('products'); setProductFilter(filter); setSelectedProduct(null); }}
+              >
+                <span className="sb-item-icon"><IcoList /></span>
+                {label}
+                {count > 0 && <span className="sb-count">{count}</span>}
+              </button>
+            ))}
           </div>
 
           <div className="sb-divider" />
@@ -1012,14 +1209,17 @@ export default function App() {
           {/* ── GENERATE VIEW ── */}
           {view === 'generate' && (
             <>
-              <div className="page-header">
-                <h1 className="page-title">Generate Content</h1>
-                <div className="page-sub">Paste an AliExpress URL to generate branded product content with Claude AI.</div>
-              </div>
-
-              {!activeBrand && (
+              {/* Brand indicator bar */}
+              {activeBrand ? (
+                <div className="brand-bar">
+                  <div className="brand-bar-dot" />
+                  <div className="brand-bar-label">Brand:</div>
+                  <div className="brand-bar-name">{activeBrand.name}</div>
+                  <button className="brand-bar-change" onClick={() => setView('brands')}>Change →</button>
+                </div>
+              ) : (
                 <div className="warn-banner">
-                  Select a brand first to start generating content.
+                  No brand selected — set one up to start generating.
                   <button className="warn-banner-btn" onClick={() => setView('brands')}>Go to Brands →</button>
                 </div>
               )}
@@ -1060,7 +1260,7 @@ export default function App() {
 
                     {(() => {
                       const hasTemplate = activeBrand?.pageTemplate?.length > 0;
-                      const contentCount = hasTemplate ? selectedSections.length : 0;
+                      const contentCount = inclContent && hasTemplate ? selectedSections.length : 0;
                       const total = (inclTitle?1:0) + contentCount + (imgEnabled&&imgShots.length>0?1:0);
                       return (
                         <button className="btn-primary" style={{width:'100%',height:44,justifyContent:'center',fontSize:'.9rem'}} onClick={generate} disabled={loading || !activeBrand || total === 0}>
@@ -1076,14 +1276,21 @@ export default function App() {
                       <div className="card-title">What to generate</div>
 
                       {/* Product Title toggle */}
-                      <div className={`tmpl-row${inclTitle?' checked':''}`} onClick={() => setInclTitle(v=>!v)} style={{marginBottom:10}}>
+                      <div className={`tmpl-row${inclTitle?' checked':''}`} onClick={() => setInclTitle(v=>!v)} style={{marginBottom:6}}>
                         <div className="tmpl-cb">{inclTitle && <IcoOk />}</div>
                         <div className="tmpl-name">Product Title</div>
                         <div className="tmpl-type-badge">+ pain point</div>
                       </div>
 
-                      {/* Template sections */}
-                      {activeBrand?.pageTemplate?.length > 0 ? (
+                      {/* Page Content toggle */}
+                      <div className={`tmpl-row${inclContent?' checked':''}`} onClick={() => setInclContent(v=>!v)} style={{marginBottom:10}}>
+                        <div className="tmpl-cb">{inclContent && <IcoOk />}</div>
+                        <div className="tmpl-name">Page Content</div>
+                        <div className="tmpl-type-badge">requires template</div>
+                      </div>
+
+                      {/* Template sections — only shown if inclContent is on */}
+                      {inclContent && (activeBrand?.pageTemplate?.length > 0 ? (
                         <>
                           <div style={{fontSize:'.62rem',fontWeight:700,textTransform:'uppercase',letterSpacing:'.09em',color:'#94a3b8',marginBottom:6,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 2px'}}>
                             Page Sections — {activeBrand.name}
@@ -1097,12 +1304,13 @@ export default function App() {
                           <div className="tmpl-sections">
                             {activeBrand.pageTemplate.map((sec, i) => {
                               const checked = selectedSections.includes(sec.id);
+                              const faqCount = activeBrand.genConfig?.faqCount || activeBrand.faqCount || 5;
                               return (
                                 <div key={sec.id} className={`tmpl-row${checked?' checked':''}`} onClick={() => setSelectedSections(prev => prev.includes(sec.id) ? prev.filter(x=>x!==sec.id) : [...prev, sec.id])}>
                                   <div className="tmpl-cb">{checked && <IcoOk />}</div>
                                   <div className="tmpl-num">{i+1}</div>
                                   <div className="tmpl-name">{sec.name || 'Unnamed section'}</div>
-                                  <div className="tmpl-type-badge">{sec.type==='faq'?`FAQ ×${activeBrand.faqCount||5}`:sec.type}</div>
+                                  <div className="tmpl-type-badge">{sec.type==='faq'?`FAQ ×${faqCount}`:sec.type}</div>
                                 </div>
                               );
                             })}
@@ -1113,9 +1321,7 @@ export default function App() {
                           No page template set for this brand.
                           <button className="no-tmpl-btn" onClick={() => { setView('brands'); setEditingBrand(activeBrand); setShowBrandForm(true); }}>Set up template →</button>
                         </div>
-                      )}
-
-
+                      ))}
 
                       <div className="field-sep" />
 
@@ -1194,7 +1400,10 @@ export default function App() {
                     </div>
                     <div className="result-actions">
                       <CopyBtn text={JSON.stringify(result, null, 2)} label="Copy all" />
-                      <button className="btn-ghost" onClick={reset}>New product</button>
+                      <button className="btn-primary" style={{height:38}} onClick={saveProduct} disabled={!activeBrand}>
+                        Save Product
+                      </button>
+                      <button className="btn-ghost" onClick={reset}>New Product</button>
                     </div>
                   </div>
 
@@ -1239,23 +1448,6 @@ export default function App() {
                   </div>
                 </>
               )}
-            </>
-          )}
-
-          {/* ── HISTORY VIEW ── */}
-          {view === 'history' && (
-            <>
-              <div className="page-header">
-                <h1 className="page-title">History</h1>
-                <div className="page-sub">Your past generations will appear here.</div>
-              </div>
-              <div className="coming-soon">
-                <div className="coming-soon-icon" style={{ fontSize: '2rem', marginBottom: 12 }}>
-                  <IcoClock />
-                </div>
-                <div className="coming-soon-title">Coming soon</div>
-                <div className="coming-soon-desc">Generation history will be saved here in a future update.</div>
-              </div>
             </>
           )}
 
@@ -1307,6 +1499,162 @@ export default function App() {
               ))}
             </>
           )}
+
+          {/* ── PRODUCTS VIEW ── */}
+          {view === 'products' && (
+            <>
+              <div className="page-header-row page-header">
+                <div>
+                  <h1 className="page-title">Products</h1>
+                  <div className="page-sub">All generated products saved to your pipeline.</div>
+                </div>
+                <button className="btn-primary" onClick={() => setView('generate')}><IcoSpark />New Product</button>
+              </div>
+
+              {/* Filter tabs */}
+              <div className="filter-tabs">
+                {[
+                  { key: 'all',   label: `All (${products.length})` },
+                  { key: 'draft', label: `Draft (${products.filter(p=>p.status==='draft').length})` },
+                  { key: 'ready', label: `Ready (${products.filter(p=>p.status==='ready').length})` },
+                  { key: 'added', label: `Added to Store (${products.filter(p=>p.status==='added').length})` },
+                ].map(({ key, label }) => (
+                  <button key={key} className={`filter-tab${productFilter === key ? ' active' : ''}`} onClick={() => setProductFilter(key)}>{label}</button>
+                ))}
+              </div>
+
+              {(() => {
+                const filtered = productFilter === 'all' ? products : products.filter(p => p.status === productFilter);
+                if (filtered.length === 0) return (
+                  <div className="empty-state">
+                    No products yet{productFilter !== 'all' ? ` with status "${productFilter}"` : ''}.
+                    <br />Generate a product and save it to see it here.
+                  </div>
+                );
+                return filtered.map(prod => (
+                  <div key={prod.id} className="product-card" onClick={() => { setSelectedProduct(prod); setView('product-detail'); }}>
+                    {prod.images && prod.images.length > 0
+                      ? <img src={prod.images[0]} className="product-thumb" alt="" onError={e => e.target.style.display='none'} />
+                      : <div className="product-thumb-empty"><IcoList /></div>
+                    }
+                    <div className="product-info">
+                      <div className="product-title">{prod.title || 'Untitled'}</div>
+                      <div className="product-meta">{prod.brandName} · {new Date(prod.createdAt).toLocaleDateString()}</div>
+                    </div>
+                    <div className="product-actions" onClick={e => e.stopPropagation()}>
+                      <span
+                        className={`status-badge ${prod.status}`}
+                        onClick={() => updateProductStatus(prod.id, cycleStatus(prod.status))}
+                        title="Click to change status"
+                      >
+                        {prod.status === 'draft' ? 'Draft' : prod.status === 'ready' ? 'Ready' : 'Added to Store'}
+                      </span>
+                      <button className="btn-sm" onClick={() => { setSelectedProduct(prod); setView('product-detail'); }}>View</button>
+                      <button className="btn-danger" style={{padding:'6px 10px'}} onClick={() => deleteProduct(prod.id)}><IcoTrash /></button>
+                    </div>
+                  </div>
+                ));
+              })()}
+            </>
+          )}
+
+          {/* ── PRODUCT DETAIL VIEW ── */}
+          {view === 'product-detail' && selectedProduct && (() => {
+            const prod = selectedProduct;
+            const prodBrand = brands.find(b => b.id === prod.brandId) || { name: prod.brandName, pageTemplate: [] };
+            return (
+              <>
+                <button className="detail-back" onClick={() => { setView('products'); setSelectedProduct(null); }}>
+                  ← Products
+                </button>
+                <div className="detail-header">
+                  <div style={{flex:1}}>
+                    <div style={{display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
+                      <div className="detail-title">{prod.title || 'Untitled'}</div>
+                      <span
+                        className={`status-badge ${prod.status}`}
+                        onClick={() => updateProductStatus(prod.id, cycleStatus(prod.status))}
+                        title="Click to change status"
+                      >
+                        {prod.status === 'draft' ? 'Draft' : prod.status === 'ready' ? 'Ready' : 'Added to Store'}
+                      </span>
+                    </div>
+                    <div className="detail-meta-row">
+                      <span className="detail-brand-pill">{prod.brandName}</span>
+                      <span style={{fontSize:'.72rem',color:'#94a3b8'}}>{new Date(prod.createdAt).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})}</span>
+                      {prod.url && <a href={prod.url} target="_blank" rel="noopener noreferrer" style={{fontSize:'.72rem',color:'#2563eb',textDecoration:'none'}} onClick={e=>e.stopPropagation()}>View on AliExpress ↗</a>}
+                    </div>
+                    {prod.result?.painPoint && <div style={{fontSize:'.84rem',color:'#64748b',marginTop:6}}>{prod.result.painPoint}</div>}
+                  </div>
+                  <div style={{display:'flex',gap:8,flexShrink:0,alignItems:'flex-start',flexWrap:'wrap'}}>
+                    {prod.status !== 'ready' && <button className="btn-primary" style={{height:36}} onClick={() => updateProductStatus(prod.id, 'ready')}>Mark as Ready</button>}
+                    {prod.status !== 'added' && <button className="btn-ghost" style={{height:36}} onClick={() => updateProductStatus(prod.id, 'added')}>Mark as Added</button>}
+                    <button className="btn-danger" onClick={() => deleteProduct(prod.id)}><IcoTrash /></button>
+                  </div>
+                </div>
+
+                {/* Images strip */}
+                {prod.images && prod.images.length > 0 && (
+                  <div className="images-strip">
+                    {prod.images.map((img, i) => (
+                      <img key={i} src={img} className={`img-thumb${selectedImg === img ? ' sel' : ''}`} alt="" onClick={() => setSelectedImg(img)} onError={e => e.target.style.display = 'none'} />
+                    ))}
+                  </div>
+                )}
+
+                {/* Generated content */}
+                <div className="result-wrap" style={{marginBottom:16}}>
+                  {prod.result?.pageContent && prodBrand?.pageTemplate?.map(sec => {
+                    const key = sectionKey(sec.name);
+                    const val = prod.result.pageContent[key];
+                    if (val === undefined || val === null) return null;
+                    const copyText = Array.isArray(val)
+                      ? (val[0]?.q ? val.map(f=>`Q: ${f.q}\nA: ${f.a}`).join('\n\n') : val.join('\n'))
+                      : String(val);
+                    return (
+                      <RegenSection key={sec.id} title={sec.name} sectionKey={`pageContent.${key}`} productData={{ url: prod.url }} brand={prodBrand} selections={['pageContent']} onUpdate={(_,v) => updateProductPageSection(prod.id, key, v)} copyText={copyText}>
+                        {sec.type === 'faq' && Array.isArray(val)
+                          ? val.map((f,i) => <div key={i} className="faq-item"><div className="faq-q">Q: {f.q}</div><div className="faq-a">{f.a}</div></div>)
+                          : sec.type === 'bullets' && Array.isArray(val)
+                          ? <ul style={{paddingLeft:18,display:'flex',flexDirection:'column',gap:4}}>{val.map((b,i)=><li key={i} style={{fontSize:'.875rem',color:'#1e293b',lineHeight:1.6}}>{b}</li>)}</ul>
+                          : <div className="cf-val">{String(val)}</div>
+                        }
+                      </RegenSection>
+                    );
+                  })}
+
+                  {prod.result?.imagePrompts && Array.isArray(prod.result.imagePrompts) && prod.result.imagePrompts.length > 0 && (
+                    <RegenSection title="Lovart Image Prompts" sectionKey="imagePrompts" productData={{ url: prod.url }} brand={prodBrand} selections={['imagePrompts']} onUpdate={(k, v) => updateProductResult(prod.id, k, v)}
+                      copyText={prod.result.imagePrompts.map((p, i) => `SHOT ${i+1} — ${p.type?.toUpperCase() || ''}\n${p.prompt}`).join('\n\n')}>
+                      <div className="prompt-grid">
+                        {prod.result.imagePrompts.map((p, i) => (
+                          <div key={i} className="prompt-item">
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <div className="prompt-shot">Shot {i + 1} — {p.type || 'Image'}</div>
+                              <CopyBtn text={p.prompt} />
+                            </div>
+                            <div className="prompt-text">{p.prompt}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </RegenSection>
+                  )}
+                </div>
+
+                {/* Notes */}
+                <div className="card" style={{marginBottom:14}}>
+                  <div className="card-title">Internal Notes</div>
+                  <textarea
+                    className="detail-notes"
+                    rows={3}
+                    placeholder="Internal notes about this product…"
+                    value={prod.notes || ''}
+                    onChange={e => updateProductNotes(prod.id, e.target.value)}
+                  />
+                </div>
+              </>
+            );
+          })()}
 
         </div>
       </div>
