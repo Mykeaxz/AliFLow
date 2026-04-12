@@ -12,14 +12,29 @@ const saveBrands      = (p, v) => ls.set(wsKey(p, 'brands'), v);
 const loadActiveBrand = (p) => ls.get(wsKey(p, 'active_brand'), null);
 const saveActiveBrand = (p, v) => ls.set(wsKey(p, 'active_brand'), v);
 
-// ── Generation options ────────────────────────────────────────────
+// ── Generation options (content sections — no image prompts here) ──
 const GEN_OPTIONS = [
-  { id: 'productName',  label: 'Product Title',       desc: 'Branded name for the product' },
-  { id: 'pricing',      label: 'Pricing',              desc: 'AliExpress → retail → sale price with reasoning' },
-  { id: 'copy',         label: 'Full Copy',            desc: 'Subtitle, short desc, overview, materials, care' },
-  { id: 'faq',          label: 'FAQ',                  desc: '5 objection-killing Q&As' },
-  { id: 'imagePrompts', label: 'Lovart Image Prompts', desc: '6-shot framework + Google Shopping prompt' },
+  { id: 'productName', label: 'Product Title',  desc: 'Branded name + core pain point' },
+  { id: 'pricing',     label: 'Pricing',         desc: 'AliExpress → retail → sale price' },
+  { id: 'copy',        label: 'Full Copy',        desc: 'Subtitle, overview, materials, care' },
+  { id: 'faq',         label: 'FAQ',              desc: '5 objection-killing Q&As' },
 ];
+
+// ── Image prompt shot types ───────────────────────────────────────
+const SHOT_TYPES = [
+  { id: 'auto',         label: 'Auto',           desc: 'Claude picks the best type for this slot' },
+  { id: 'lifestyle',    label: 'Lifestyle',       desc: 'Person using & enjoying the product naturally' },
+  { id: 'hero',         label: 'Hero Shot',       desc: 'Clean product on brand background, no clutter' },
+  { id: 'mockup',       label: 'Mockup',          desc: 'Product in a styled scene or flat lay' },
+  { id: 'infographic',  label: 'Infographic',     desc: 'Benefit callouts with labeled arrows' },
+  { id: 'beforeafter',  label: 'Before / After',  desc: 'Split image showing the transformation' },
+  { id: 'sizescale',    label: 'Size & Scale',    desc: 'Overhead with dimension arrows' },
+  { id: 'detail',       label: 'Detail Close-up', desc: 'Macro shot of material, texture or mechanism' },
+  { id: 'packaging',    label: 'Packaging',       desc: 'Product in branded packaging or unboxing' },
+  { id: 'ugc',          label: 'UGC Style',       desc: 'Authentic, phone-shot feel with real hands' },
+  { id: 'shopping',     label: 'Google Shopping', desc: 'White bg, product centred, ad-ready' },
+];
+const DEFAULT_SHOTS = ['lifestyle', 'hero', 'infographic', 'detail', 'sizescale', 'beforeafter'];
 
 // ── Icons ─────────────────────────────────────────────────────────
 const IcoCopy    = () => <svg width="14" height="14" viewBox="0 0 15 15" fill="none"><rect x="4" y="4" width="9" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.4"/><path d="M2 11V2h9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>;
@@ -139,6 +154,42 @@ input:focus,textarea:focus,select:focus{background:#fff!important;box-shadow:0 0
 .gen-opt-label{font-size:.84rem;font-weight:700;color:#0f172a}
 .gen-opt-desc{font-size:.74rem;color:#94a3b8;margin-top:1px}
 .gen-row{display:flex;justify-content:flex-end;margin-top:14px}
+
+/* ── IMAGE PROMPT CONFIGURATOR ── */
+.img-cfg-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.img-cfg-toggle{display:flex;align-items:center;gap:10px}
+.img-cfg-label{font-size:.84rem;font-weight:700;color:#0f172a}
+.img-cfg-sub{font-size:.74rem;color:#94a3b8;margin-top:1px}
+.img-cfg-enabled .img-cfg-label{color:#0f172a}
+.img-cfg-disabled .img-cfg-label{color:#94a3b8}
+/* toggle switch */
+.toggle-sw{position:relative;width:36px;height:20px;flex-shrink:0}
+.toggle-sw input{opacity:0;width:0;height:0;position:absolute}
+.toggle-track{position:absolute;inset:0;background:#e2e8f0;border-radius:10px;cursor:pointer;transition:background .15s}
+.toggle-sw input:checked + .toggle-track{background:#2563eb}
+.toggle-thumb{position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .15s;box-shadow:0 1px 3px rgba(0,0,0,.15);pointer-events:none}
+.toggle-sw input:checked ~ .toggle-thumb{transform:translateX(16px)}
+/* quantity stepper */
+.qty-stepper{display:flex;align-items:center;gap:2px;background:#f1f5f9;border-radius:8px;padding:2px}
+.qty-btn{width:28px;height:28px;border:none;background:none;cursor:pointer;border-radius:6px;font-size:1rem;font-weight:700;color:#475569;display:flex;align-items:center;justify-content:center;transition:all .1s;line-height:1}
+.qty-btn:hover:not(:disabled){background:#e2e8f0;color:#0f172a}
+.qty-btn:disabled{opacity:.3;cursor:not-allowed}
+.qty-val{width:28px;text-align:center;font-size:.84rem;font-weight:700;color:#0f172a}
+/* shot slots */
+.shot-slots{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.shot-slot{display:flex;align-items:center;gap:8px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:9px;padding:7px 10px;transition:border-color .12s}
+.shot-slot:hover{border-color:#bfdbfe}
+.shot-num{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff;font-size:.62rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.shot-type-wrap{flex:1;position:relative}
+.shot-type-select{width:100%;padding:5px 28px 5px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.8rem;font-weight:600;font-family:inherit;color:#334155;background:#fff;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath fill='%2394a3b8' d='M4 5L0 0h8z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;transition:all .12s}
+.shot-type-select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+.shot-type-select.is-auto{color:#94a3b8}
+.shot-desc{font-size:.71rem;color:#94a3b8;width:160px;flex-shrink:0;line-height:1.3}
+.shot-remove{width:22px;height:22px;border-radius:5px;border:none;background:none;cursor:pointer;color:#cbd5e1;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .1s;flex-shrink:0;line-height:1}
+.shot-remove:hover{background:#fef2f2;color:#ef4444}
+.shot-add-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.shot-quick-tag{padding:4px 10px;border-radius:999px;border:1.5px solid #e2e8f0;background:#f8fafc;font-size:.74rem;font-weight:600;color:#64748b;cursor:pointer;transition:all .12s;font-family:inherit}
+.shot-quick-tag:hover{border-color:#bfdbfe;background:#eff6ff;color:#1d4ed8}
 
 /* ── IMAGES ── */
 .images-strip{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
@@ -546,6 +597,8 @@ export default function App() {
   const [url, setUrl]               = useState('');
   const [notes, setNotes]           = useState('');
   const [selections, setSelections] = useState(() => GEN_OPTIONS.map(o => o.id));
+  const [imgEnabled, setImgEnabled] = useState(true);
+  const [imgShots, setImgShots]     = useState(() => DEFAULT_SHOTS.map((t,i) => ({ id: i, type: t })));
   const [loading, setLoading]       = useState(false);
   const [status, setStatus]         = useState('');
   const [error, setError]           = useState('');
@@ -585,10 +638,15 @@ export default function App() {
 
   const toggleSel = (id) => setSelections(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
 
+  const addShot = (type = 'auto') => setImgShots(prev => [...prev, { id: Date.now(), type }]);
+  const removeShot = (id) => setImgShots(prev => prev.filter(s => s.id !== id));
+  const setShotType = (id, type) => setImgShots(prev => prev.map(s => s.id === id ? { ...s, type } : s));
+
   const generate = async () => {
+    const allSections = [...selections, ...(imgEnabled && imgShots.length > 0 ? ['imagePrompts'] : [])];
     if (!url.trim() || !url.includes('aliexpress.com')) return setError('Please paste a valid AliExpress product URL');
     if (!activeBrand) return setError('Set up a brand first');
-    if (selections.length === 0) return setError('Select at least one thing to generate');
+    if (allSections.length === 0) return setError('Select at least one thing to generate');
     setError(''); setLoading(true); setResult(null); setImages([]);
     setStatus('Starting scraper…');
     try {
@@ -612,7 +670,8 @@ export default function App() {
       setProductData({ ...pd, notes });
       setStatus('Generating with Claude…');
 
-      const briefRes = await fetch('/api/brief', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ productData: { ...pd, notes }, brand: activeBrand, selections }) });
+      const shotConfig = imgEnabled ? imgShots.map((s, i) => ({ slot: i + 1, type: s.type })) : [];
+      const briefRes = await fetch('/api/brief', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ productData: { ...pd, notes }, brand: activeBrand, selections: allSections, shotConfig }) });
       const brief = await briefRes.json();
       if (!briefRes.ok) throw new Error(brief.error || 'Generation failed');
       setResult(brief); setStatus('');
@@ -621,7 +680,7 @@ export default function App() {
   };
 
   const updateSection = (key, val) => setResult(prev => ({ ...prev, [key]: val }));
-  const reset = () => { setUrl(''); setNotes(''); setResult(null); setImages([]); setError(''); setStatus(''); setProductData(null); };
+  const reset = () => { setUrl(''); setNotes(''); setResult(null); setImages([]); setError(''); setStatus(''); setProductData(null); setSelectedImg(null); };
 
   if (!profile) return <LoginScreen onLogin={login} />;
 
@@ -753,7 +812,7 @@ export default function App() {
                     </div>
                     <div className="gen-opts-grid">
                       {GEN_OPTIONS.map(opt => (
-                        <div key={opt.id} className={`gen-opt${selections.includes(opt.id) ? ' checked' : ''}`} onClick={() => toggleSel(opt.id)}>
+                        <div key={opt.id} className={`gen-opt${selections.includes(opt.id) ? ' checked' : ''}`} onClick={() => setSelections(prev => prev.includes(opt.id) ? prev.filter(x => x !== opt.id) : [...prev, opt.id])}>
                           <div className="gen-opt-cb">{selections.includes(opt.id) && <IcoOk />}</div>
                           <div>
                             <div className="gen-opt-label">{opt.label}</div>
@@ -762,10 +821,73 @@ export default function App() {
                         </div>
                       ))}
                     </div>
+
+                    {/* ── IMAGE PROMPTS CONFIGURATOR ── */}
+                    <div className="field-sep" />
+                    <div className={`img-cfg-${imgEnabled ? 'enabled' : 'disabled'}`}>
+                      <div className="img-cfg-header">
+                        <div>
+                          <div className="img-cfg-label">Lovart Image Prompts</div>
+                          <div className="img-cfg-sub">{imgEnabled ? `${imgShots.length} shot${imgShots.length !== 1 ? 's' : ''} configured` : 'Disabled — no image prompts will be generated'}</div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          {imgEnabled && (
+                            <div className="qty-stepper">
+                              <button className="qty-btn" onClick={() => imgShots.length > 1 && removeShot(imgShots[imgShots.length - 1].id)} disabled={imgShots.length <= 1}>−</button>
+                              <div className="qty-val">{imgShots.length}</div>
+                              <button className="qty-btn" onClick={() => addShot('auto')} disabled={imgShots.length >= 10}>+</button>
+                            </div>
+                          )}
+                          <label className="toggle-sw">
+                            <input type="checkbox" checked={imgEnabled} onChange={e => setImgEnabled(e.target.checked)} />
+                            <div className="toggle-track" />
+                            <div className="toggle-thumb" />
+                          </label>
+                        </div>
+                      </div>
+
+                      {imgEnabled && (
+                        <>
+                          <div className="shot-slots">
+                            {imgShots.map((shot, i) => {
+                              const typeInfo = SHOT_TYPES.find(t => t.id === shot.type) || SHOT_TYPES[0];
+                              return (
+                                <div key={shot.id} className="shot-slot">
+                                  <div className="shot-num">{i + 1}</div>
+                                  <div className="shot-type-wrap">
+                                    <select
+                                      className={`shot-type-select${shot.type === 'auto' ? ' is-auto' : ''}`}
+                                      value={shot.type}
+                                      onChange={e => setShotType(shot.id, e.target.value)}
+                                    >
+                                      {SHOT_TYPES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+                                    </select>
+                                  </div>
+                                  <div className="shot-desc">{typeInfo.desc}</div>
+                                  <button className="shot-remove" onClick={() => removeShot(shot.id)} disabled={imgShots.length <= 1} title="Remove slot">×</button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                          <div className="shot-add-row">
+                            <span style={{ fontSize: '.72rem', color: '#94a3b8', fontWeight: 600, alignSelf: 'center' }}>Quick add:</span>
+                            {SHOT_TYPES.filter(t => t.id !== 'auto' && !imgShots.some(s => s.type === t.id)).slice(0, 5).map(t => (
+                              <button key={t.id} className="shot-quick-tag" onClick={() => addShot(t.id)} disabled={imgShots.length >= 10}>+ {t.label}</button>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </div>
+
                     <div className="gen-row">
-                      <button className="btn-primary" onClick={generate} disabled={loading || !activeBrand || selections.length === 0}>
-                        <IcoSpark />{loading ? 'Generating…' : `Generate ${selections.length} section${selections.length !== 1 ? 's' : ''}`}
-                      </button>
+                      {(() => {
+                        const total = selections.length + (imgEnabled && imgShots.length > 0 ? 1 : 0);
+                        return (
+                          <button className="btn-primary" onClick={generate} disabled={loading || !activeBrand || total === 0}>
+                            <IcoSpark />{loading ? 'Generating…' : `Generate${total > 0 ? ` (${total} section${total !== 1 ? 's' : ''})` : ''}`}
+                          </button>
+                        );
+                      })()}
                     </div>
                   </div>
                 </>
@@ -833,32 +955,20 @@ export default function App() {
                       </RegenSection>
                     )}
 
-                    {result.imagePrompts && (
-                      <RegenSection title="Lovart Image Prompts" sectionKey="imagePrompts" productData={productData} brand={activeBrand} selections={selections} onUpdate={updateSection}
-                        copyText={Object.entries(result.imagePrompts).map(([k, v]) => `${k.toUpperCase()}: ${v}`).join('\n\n')}>
+                    {result.imagePrompts && Array.isArray(result.imagePrompts) && result.imagePrompts.length > 0 && (
+                      <RegenSection title="Lovart Image Prompts" sectionKey="imagePrompts" productData={productData} brand={activeBrand} selections={[...selections,'imagePrompts']} onUpdate={updateSection}
+                        copyText={result.imagePrompts.map((p, i) => `SHOT ${i+1} — ${p.type?.toUpperCase() || ''}\n${p.prompt}`).join('\n\n')}>
                         <div className="prompt-grid">
-                          {Object.entries(result.imagePrompts).map(([shot, prompt]) => (
-                            <div key={shot} className="prompt-item">
+                          {result.imagePrompts.map((p, i) => (
+                            <div key={i} className="prompt-item">
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <div className="prompt-shot">{shot.replace('shot', 'Shot ')}</div>
-                                <CopyBtn text={prompt} />
+                                <div className="prompt-shot">Shot {i + 1} — {p.type || 'Image'}</div>
+                                <CopyBtn text={p.prompt} />
                               </div>
-                              <div className="prompt-text">{prompt}</div>
+                              <div className="prompt-text">{p.prompt}</div>
                             </div>
                           ))}
                         </div>
-                        {result.googleShoppingPrompt && (
-                          <div style={{ marginTop: 12 }}>
-                            <div className="cf-label" style={{ marginBottom: 6 }}>Google Shopping Prompt</div>
-                            <div className="prompt-item">
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <div className="prompt-shot">Google Shopping</div>
-                                <CopyBtn text={result.googleShoppingPrompt} />
-                              </div>
-                              <div className="prompt-text">{result.googleShoppingPrompt}</div>
-                            </div>
-                          </div>
-                        )}
                       </RegenSection>
                     )}
                   </div>

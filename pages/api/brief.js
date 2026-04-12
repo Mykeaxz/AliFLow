@@ -1,7 +1,22 @@
+// Shot type instructions for Claude
+const SHOT_INSTRUCTIONS = {
+  auto:        'Choose the most impactful shot type for this slot based on the product.',
+  lifestyle:   'Lifestyle shot — person visibly using and enjoying the product in a natural, relaxed setting. Pure emotion, no text overlays.',
+  hero:        'Clean product hero shot — product centred on brand background colour, minimal props, no clutter.',
+  mockup:      'Styled scene or flat lay mockup — product arranged with complementary props that match brand aesthetic.',
+  infographic: 'Benefit callout infographic — product with labeled arrows pointing to key features. Bold sans-serif text in brand colours.',
+  beforeafter: 'Before/after split image — left side shows the problem, right side shows the product solving it.',
+  sizescale:   'Size & scale overhead — product from above with dimension arrows and measurements clearly labeled.',
+  detail:      'Macro detail close-up — extreme close-up of the most impressive material, texture, or mechanism.',
+  packaging:   'Packaging & unboxing shot — product in or next to its branded packaging, premium feel.',
+  ugc:         'UGC-style authentic shot — casual, phone-shot aesthetic with real hands or a natural environment. No polish.',
+  shopping:    'Google Shopping ad image — pure white background, product perfectly centred, no text, ad-ready.',
+};
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { productData, brand, selections, regenNote } = req.body;
+  const { productData, brand, selections, regenNote, shotConfig } = req.body;
   if (!productData) return res.status(400).json({ error: 'Product data required' });
   if (!brand) return res.status(400).json({ error: 'Brand profile required' });
 
@@ -44,15 +59,14 @@ export default async function handler(req, res) {
     ];
   }
   if (toGenerate.includes('imagePrompts')) {
-    outputFields.imagePrompts = {
-      shot1: 'Lifestyle shot — pure emotion, no text. Full Lovart prompt.',
-      shot2: 'Clean product hero — brand background. Full Lovart prompt.',
-      shot3: 'Anatomy/mechanism explainer. Full Lovart prompt.',
-      shot4: 'Benefit callout with labeled arrows. Full Lovart prompt.',
-      shot5: 'Size/scale overhead with dimension arrows. Full Lovart prompt.',
-      shot6: 'Before/after or secondary lifestyle. Full Lovart prompt.',
-    };
-    outputFields.googleShoppingPrompt = 'Full Lovart prompt for Google Shopping ad image.';
+    // Build shot list from shotConfig or fallback to 6 auto shots
+    const shots = shotConfig && shotConfig.length > 0
+      ? shotConfig
+      : [1,2,3,4,5,6].map(slot => ({ slot, type: 'auto' }));
+    outputFields.imagePrompts = shots.map(s => ({
+      type: s.type === 'auto' ? '(type Claude chose)' : s.type,
+      prompt: `Full Lovart prompt for shot ${s.slot} — ${SHOT_INSTRUCTIONS[s.type] || SHOT_INSTRUCTIONS.auto}`,
+    }));
   }
 
   const systemPrompt = `You are a product copywriter for ${brand.name}${brand.tagline ? ` — ${brand.tagline}` : ''}.
@@ -89,13 +103,16 @@ BRAND COLORS — use these consistently in every Lovart prompt:
 
 LOVART IMAGE PROMPT RULES — apply to every image prompt:
 - Always start every prompt with: "IMPORTANT: Use the uploaded product reference image. Recreate that exact product — do not change any feature of the product."
-- For lifestyle/person shots: "The person must be visibly using and enjoying the product in a natural, relaxed way"
+- For lifestyle/person shots: the person must be visibly using and enjoying the product in a natural, relaxed way
 - Text overlays: bold, modern sans-serif in ${brand.colorText || 'brand text color'} — NEVER thin grey text
 - Background should use ${brand.colorBg || 'brand background color'} where applicable
 - Accent elements and highlights should use ${brand.colorAccent || 'brand accent color'}
 - No irrelevant props or clutter. No white studio backgrounds unless that matches the brand color.
 - Consistent brand colours throughout all shots.
 - All shots: 1080x1080px square format.
+- imagePrompts output is an ARRAY of objects: [{ "type": "shot type name", "prompt": "full Lovart prompt" }, ...]
+- For "auto" type shots: pick the best shot type yourself and set "type" to what you chose (e.g. "lifestyle")
+- Write a genuinely detailed, actionable Lovart prompt for each shot — not a placeholder.
 
 OUTPUT FORMAT — respond ONLY with valid JSON. Only include the fields listed below. No extra fields, no markdown.
 ${JSON.stringify(outputFields, null, 2)}`;
@@ -104,12 +121,16 @@ ${JSON.stringify(outputFields, null, 2)}`;
     ? `\n\nIMPORTANT — This is a REGENERATION request. The user is unhappy with the previous output and has given this feedback:\n"${regenNote}"\nFix the issues described. Only output the requested section(s).`
     : '';
 
+  const shotSummary = shotConfig && shotConfig.length > 0
+    ? shotConfig.map(s => `Shot ${s.slot}: ${s.type} — ${SHOT_INSTRUCTIONS[s.type] || 'auto pick'}`).join('\n')
+    : null;
+
   const userMessage = `Generate ${brand.name} content for this AliExpress product.
 
 PRODUCT TITLE: ${productData.title || 'Unknown product'}
 IMAGES AVAILABLE: ${(productData.images || []).length} product images
 EXTRA NOTES / CONTEXT: ${productData.notes || 'None'}
-SECTIONS TO GENERATE: ${toGenerate.join(', ')}${regenInstruction}
+SECTIONS TO GENERATE: ${toGenerate.join(', ')}${shotSummary ? `\n\nIMAGE PROMPT SHOT LIST (generate exactly these shots in this order):\n${shotSummary}` : ''}${regenInstruction}
 
 Respond with valid JSON only.`;
 
