@@ -352,34 +352,38 @@ input:focus,textarea:focus,select:focus{background:#fff!important;box-shadow:0 0
 .faq-count-label{font-size:.8rem;font-weight:600;color:#1d4ed8;flex:1}
 
 /* ── PRICE CALCULATOR ── */
-.calc-card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;margin-bottom:14px;overflow:hidden;box-shadow:0 2px 12px rgba(15,23,42,.06)}
-.calc-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;user-select:none;transition:background .1s}
-.calc-header:hover{background:#fafbfd}
-.calc-header-left{display:flex;align-items:center;gap:10px}
-.calc-icon{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#0891b2,#06b6d4);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.calc-title{font-size:.88rem;font-weight:700;color:#0f172a}
-.calc-sub{font-size:.72rem;color:#94a3b8;margin-top:1px}
-.calc-chevron{color:#94a3b8;transition:transform .2s;font-size:.7rem}
-.calc-chevron.open{transform:rotate(180deg)}
-.calc-body{padding:16px 18px 18px;border-top:1px solid #f1f5f9}
-.calc-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
-.calc-label{font-size:.76rem;font-weight:600;color:#475569;white-space:nowrap;min-width:60px}
-.calc-cost{width:120px;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.95rem;font-weight:700;font-family:inherit;color:#0f172a;background:#f8fafc;outline:none;transition:all .15s}
+.calc-wrap{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:18px;box-shadow:0 2px 12px rgba(15,23,42,.06)}
+.calc-head{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+.calc-icon{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#0891b2,#06b6d4);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.calc-title{font-size:.84rem;font-weight:700;color:#0f172a}
+.calc-field{margin-bottom:12px}
+.calc-field-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:5px}
+.calc-cost-row{display:flex;align-items:center;gap:8px}
+.calc-cost{flex:1;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.95rem;font-weight:700;font-family:inherit;color:#0f172a;background:#f8fafc;outline:none;transition:all .15s}
 .calc-cost:focus{border-color:#0891b2;background:#fff;box-shadow:0 0 0 3px rgba(8,145,178,.1)}
-.calc-currency{font-size:.78rem;color:#94a3b8;font-weight:600}
+.calc-currency{font-size:.78rem;color:#94a3b8;font-weight:700;background:#f1f5f9;padding:6px 10px;border-radius:7px;border:1px solid #e2e8f0}
 .mult-btns{display:flex;gap:4px;flex-wrap:wrap}
-.mult-btn{padding:6px 13px;border-radius:7px;border:1.5px solid #e2e8f0;background:#f8fafc;font-size:.8rem;font-weight:700;color:#475569;cursor:pointer;font-family:inherit;transition:all .12s}
+.mult-btn{padding:6px 12px;border-radius:7px;border:1.5px solid #e2e8f0;background:#f8fafc;font-size:.8rem;font-weight:700;color:#475569;cursor:pointer;font-family:inherit;transition:all .12s}
 .mult-btn:hover{border-color:#bfdbfe;color:#1d4ed8;background:#eff6ff}
 .mult-btn.active{background:#1d4ed8;border-color:#1d4ed8;color:#fff}
-.mult-custom{width:64px;padding:6px 8px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.8rem;font-weight:700;font-family:inherit;color:#0f172a;background:#f8fafc;outline:none;text-align:center;transition:all .12s}
+.mult-custom{width:70px;padding:6px 8px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.8rem;font-weight:700;font-family:inherit;color:#0f172a;background:#f8fafc;outline:none;text-align:center;transition:all .12s}
 .mult-custom:focus{border-color:#3b82f6;background:#fff}
-.calc-results{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px}
-.calc-cell{background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:10px 12px}
-.calc-cell.hi{background:linear-gradient(135deg,#eff6ff,#e0f2fe);border-color:#bfdbfe}
-.calc-cell-label{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:3px}
-.calc-cell-val{font-size:1.05rem;font-weight:800;color:#0f172a}
-.calc-cell.hi .calc-cell-val{color:#1d4ed8}
-.calc-cell-sub{font-size:.68rem;color:#94a3b8;margin-top:2px}
+.calc-divider{height:1px;background:#f1f5f9;margin:14px 0}
+.calc-results{display:flex;flex-direction:column;gap:8px}
+.calc-result-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:9px;background:#f8fafc;border:1px solid #e2e8f0}
+.calc-result-row.hi{background:linear-gradient(135deg,#eff6ff,#e0f2fe);border-color:#bfdbfe}
+.calc-result-label{font-size:.78rem;font-weight:600;color:#64748b;display:flex;align-items:center;gap:7px}
+.calc-result-row.hi .calc-result-label{color:#1d4ed8}
+.calc-result-val{font-size:1rem;font-weight:800;color:#0f172a}
+.calc-result-row.hi .calc-result-val{color:#1d4ed8}
+.calc-sale-pct-input{width:46px;padding:3px 6px;border:1.5px solid #bfdbfe;border-radius:5px;font-size:.8rem;font-weight:700;font-family:inherit;color:#1d4ed8;background:#fff;outline:none;text-align:center}
+.calc-result-sub{font-size:.68rem;color:#94a3b8;margin-top:1px}
+.calc-margin-badge{padding:2px 8px;border-radius:5px;font-size:.72rem;font-weight:800;background:#dcfce7;color:#16a34a;border:1px solid #bbf7d0}
+
+/* ── GENERATE TWO-COLUMN LAYOUT ── */
+.gen-layout{display:grid;grid-template-columns:320px 1fr;gap:16px;align-items:start}
+.gen-left{display:flex;flex-direction:column;gap:14px;position:sticky;top:68px}
+.gen-right{display:flex;flex-direction:column;gap:14px}
 
 /* ── TEMPLATE SECTION TOGGLES (in generate view) ── */
 .tmpl-sections{display:flex;flex-direction:column;gap:6px;margin-bottom:4px}
@@ -608,83 +612,85 @@ function BrandForm({ initial, onSave, onCancel }) {
 
 // ── PriceCalculator ───────────────────────────────────────────────
 function PriceCalculator({ currency }) {
-  const [open, setOpen]   = useState(false);
-  const [cost, setCost]   = useState('');
-  const [mult, setMult]   = useState(4);
-  const [custom, setCustom] = useState('');
+  const [cost, setCost]       = useState('');
+  const [mult, setMult]       = useState(4);
+  const [customMult, setCustomMult] = useState('');
+  const [salePct1, setSalePct1]   = useState('30');
+  const [salePct2, setSalePct2]   = useState('50');
 
-  const activeMult = custom ? parseFloat(custom) || 0 : mult;
-  const cur        = currency || 'AUD';
-  const fmt        = (n) => isNaN(n) || !isFinite(n) ? '—' : `${cur} ${n.toFixed(2)}`;
+  const activeMult = customMult ? parseFloat(customMult) || 0 : mult;
+  const cur = currency || 'AUD';
+  const fmt = (n) => isNaN(n) || !isFinite(n) || n <= 0 ? '—' : `${cur} ${n.toFixed(2)}`;
 
   const calcRetail = (c, m) => {
-    if (!c || !m) return NaN;
     const raw = parseFloat(c) * m;
-    if (isNaN(raw) || raw <= 0) return NaN;
-    // Round to nearest nice .95 ending
+    if (!c || !m || isNaN(raw) || raw <= 0) return NaN;
     const rounded = Math.ceil(raw / 5) * 5 - 0.05;
     return rounded < raw ? rounded + 5 : rounded;
   };
 
-  const retail   = calcRetail(cost, activeMult);
-  const sale20   = isNaN(retail) ? NaN : retail * 0.80;
-  const sale30   = isNaN(retail) ? NaN : retail * 0.70;
-  const margin   = isNaN(retail) || !cost ? NaN : ((retail - parseFloat(cost)) / retail * 100);
+  const retail  = calcRetail(cost, activeMult);
+  const saleVal1 = isNaN(retail) ? NaN : retail * (1 - (parseFloat(salePct1)||0) / 100);
+  const saleVal2 = isNaN(retail) ? NaN : retail * (1 - (parseFloat(salePct2)||0) / 100);
+  const margin  = isNaN(retail) || !cost ? NaN : ((retail - parseFloat(cost)) / retail * 100);
 
   return (
-    <div className="calc-card">
-      <div className="calc-header" onClick={() => setOpen(o => !o)}>
-        <div className="calc-header-left">
-          <div className="calc-icon">
-            <svg width="14" height="14" viewBox="0 0 15 15" fill="none"><path d="M2 4h11M2 7.5h7M2 11h5M11 8v5M8.5 10.5h5" stroke="rgba(255,255,255,.9)" strokeWidth="1.5" strokeLinecap="round"/></svg>
-          </div>
-          <div>
-            <div className="calc-title">Price Calculator</div>
-            <div className="calc-sub">Instant markup calculator — no Claude needed</div>
-          </div>
+    <div className="calc-wrap">
+      <div className="calc-head">
+        <div className="calc-icon">
+          <svg width="13" height="13" viewBox="0 0 15 15" fill="none"><path d="M2 4h11M2 7.5h7M2 11h5M11 8v5M8.5 10.5h5" stroke="rgba(255,255,255,.95)" strokeWidth="1.5" strokeLinecap="round"/></svg>
         </div>
-        <span className={`calc-chevron${open?' open':''}`}>▼</span>
+        <div className="calc-title">Price Calculator</div>
       </div>
-      {open && (
-        <div className="calc-body">
-          <div className="calc-row">
-            <div className="calc-label">Cost price</div>
-            <input className="calc-cost" type="number" min="0" step="0.01" placeholder="0.00" value={cost} onChange={e => setCost(e.target.value)} />
-            <span className="calc-currency">{cur}</span>
-          </div>
-          <div className="calc-row">
-            <div className="calc-label">Multiplier</div>
-            <div className="mult-btns">
-              {[2,3,4,5].map(m => (
-                <button key={m} className={`mult-btn${!custom && mult===m?' active':''}`} onClick={() => { setMult(m); setCustom(''); }}>{m}×</button>
-              ))}
-              <input className="mult-custom" type="number" min="1" step="0.1" placeholder="Custom" value={custom} onChange={e => setCustom(e.target.value)} onFocus={() => setMult(0)} />
-            </div>
-          </div>
-          <div className="calc-results">
-            <div className="calc-cell hi">
-              <div className="calc-cell-label">Retail</div>
-              <div className="calc-cell-val">{fmt(retail)}</div>
-              <div className="calc-cell-sub">{activeMult}× markup</div>
-            </div>
-            <div className="calc-cell">
-              <div className="calc-cell-label">Sale −20%</div>
-              <div className="calc-cell-val">{fmt(sale20)}</div>
-              <div className="calc-cell-sub">20% off retail</div>
-            </div>
-            <div className="calc-cell">
-              <div className="calc-cell-label">Sale −30%</div>
-              <div className="calc-cell-val">{fmt(sale30)}</div>
-              <div className="calc-cell-sub">30% off retail</div>
-            </div>
-            <div className="calc-cell">
-              <div className="calc-cell-label">Gross Margin</div>
-              <div className="calc-cell-val">{isNaN(margin) ? '—' : `${margin.toFixed(0)}%`}</div>
-              <div className="calc-cell-sub">at retail price</div>
-            </div>
-          </div>
+
+      <div className="calc-field">
+        <div className="calc-field-label">AliExpress cost</div>
+        <div className="calc-cost-row">
+          <input className="calc-cost" type="number" min="0" step="0.01" placeholder="0.00" value={cost} onChange={e => setCost(e.target.value)} />
+          <div className="calc-currency">{cur}</div>
         </div>
-      )}
+      </div>
+
+      <div className="calc-field">
+        <div className="calc-field-label">Markup multiplier</div>
+        <div className="mult-btns">
+          {[2,3,4,5].map(m => (
+            <button key={m} className={`mult-btn${!customMult && mult===m?' active':''}`} onClick={() => { setMult(m); setCustomMult(''); }}>{m}×</button>
+          ))}
+          <input className="mult-custom" type="number" min="1" step="0.1" placeholder="×" value={customMult} onChange={e => setCustomMult(e.target.value)} onFocus={() => setMult(0)} />
+        </div>
+      </div>
+
+      <div className="calc-divider" />
+
+      <div className="calc-results">
+        <div className="calc-result-row hi">
+          <div className="calc-result-label">
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.3"/><path d="M6 3.5v2.5l1.5 1.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
+            Retail price
+          </div>
+          <div className="calc-result-val">{fmt(retail)}</div>
+        </div>
+
+        <div className="calc-result-row">
+          <div className="calc-result-label">
+            Sale −<input className="calc-sale-pct-input" type="number" min="1" max="99" value={salePct1} onChange={e => setSalePct1(e.target.value)} onClick={e => e.stopPropagation()} />%
+          </div>
+          <div className="calc-result-val">{fmt(saleVal1)}</div>
+        </div>
+
+        <div className="calc-result-row">
+          <div className="calc-result-label">
+            Sale −<input className="calc-sale-pct-input" type="number" min="1" max="99" value={salePct2} onChange={e => setSalePct2(e.target.value)} onClick={e => e.stopPropagation()} />%
+          </div>
+          <div className="calc-result-val">{fmt(saleVal2)}</div>
+        </div>
+
+        <div className="calc-result-row" style={{background:'#f0fdf4',borderColor:'#bbf7d0'}}>
+          <div className="calc-result-label" style={{color:'#16a34a'}}>Gross margin</div>
+          <div className="calc-margin-badge">{isNaN(margin) ? '—' : `${margin.toFixed(0)}%`}</div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1019,154 +1025,153 @@ export default function App() {
               )}
 
               {!result && (
-                <>
-                  {/* URL + Notes card */}
-                  <div className="card">
-                    <div className="card-title">Product URL</div>
-                    <div className="field-group">
-                      <input
-                        className="input-text"
-                        placeholder="https://www.aliexpress.com/item/..."
-                        value={url}
-                        onChange={e => setUrl(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && !loading && generate()}
-                        disabled={loading}
-                      />
-                    </div>
-                    <div className="field-sep" />
-                    <div className="field-group">
-                      <div className="field-label">
-                        Notes for Claude <span style={{ fontWeight: 400, fontSize: '.71rem', color: '#94a3b8' }}>(optional — extra context, angle, target price…)</span>
+                <div className="gen-layout">
+                  {/* ── LEFT COLUMN: URL + Notes + Price Calc + Generate ── */}
+                  <div className="gen-left">
+                    <div className="card" style={{marginBottom:0}}>
+                      <div className="card-title">Product URL</div>
+                      <div className="field-group">
+                        <input
+                          className="input-text"
+                          placeholder="https://www.aliexpress.com/item/..."
+                          value={url}
+                          onChange={e => setUrl(e.target.value)}
+                          onKeyDown={e => e.key === 'Enter' && !loading && generate()}
+                          disabled={loading}
+                        />
                       </div>
-                      <textarea
-                        className="input-ta"
-                        rows={2}
-                        placeholder="e.g. Push the warmth angle, target retail price AUD $49, this is for our winter collection..."
-                        value={notes}
-                        onChange={e => setNotes(e.target.value)}
-                        disabled={loading}
-                      />
+                      <div className="field-sep" />
+                      <div className="field-group">
+                        <div className="field-label">
+                          Notes <span style={{ fontWeight: 400, fontSize: '.71rem', color: '#94a3b8' }}>(optional)</span>
+                        </div>
+                        <textarea
+                          className="input-ta"
+                          rows={2}
+                          placeholder="Extra context, angle, target audience…"
+                          value={notes}
+                          onChange={e => setNotes(e.target.value)}
+                          disabled={loading}
+                        />
+                      </div>
                     </div>
+
+                    <PriceCalculator currency={activeBrand?.currency} />
+
+                    {(() => {
+                      const hasTemplate = activeBrand?.pageTemplate?.length > 0;
+                      const contentCount = hasTemplate ? selectedSections.length : 0;
+                      const total = (inclTitle?1:0) + contentCount + (imgEnabled&&imgShots.length>0?1:0);
+                      return (
+                        <button className="btn-primary" style={{width:'100%',height:44,justifyContent:'center',fontSize:'.9rem'}} onClick={generate} disabled={loading || !activeBrand || total === 0}>
+                          <IcoSpark />{loading ? 'Generating…' : `Generate${total > 0 ? ` — ${total} item${total!==1?'s':''}` : ''}`}
+                        </button>
+                      );
+                    })()}
                   </div>
 
-                  {/* Price Calculator */}
-                  <PriceCalculator currency={activeBrand?.currency} />
+                  {/* ── RIGHT COLUMN: What to generate ── */}
+                  <div className="gen-right">
+                    <div className="card" style={{marginBottom:0}}>
+                      <div className="card-title">What to generate</div>
 
-                  {/* What to generate card */}
-                  <div className="card">
-                    <div className="card-title">What to generate</div>
-
-                    {/* Always: Product Title toggle */}
-                    <div className={`tmpl-row${inclTitle?' checked':''}`} onClick={() => setInclTitle(v=>!v)} style={{marginBottom:8}}>
-                      <div className="tmpl-cb">{inclTitle && <IcoOk />}</div>
-                      <div className="tmpl-name">Product Title</div>
-                      <div className="tmpl-type-badge">always useful</div>
-                    </div>
-
-                    {/* Template sections */}
-                    {activeBrand?.pageTemplate?.length > 0 ? (
-                      <>
-                        <div style={{fontSize:'.72rem',fontWeight:700,textTransform:'uppercase',letterSpacing:'.08em',color:'#94a3b8',marginBottom:6,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-                          Page Sections
-                          <button style={{fontSize:'.74rem',fontWeight:600,color:'#2563eb',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit',textTransform:'none',letterSpacing:0}} onClick={() => {
-                            const tmpl = activeBrand.pageTemplate;
-                            setSelectedSections(selectedSections.length === tmpl.length ? [] : tmpl.map(s=>s.id));
-                          }}>
-                            {selectedSections.length === activeBrand.pageTemplate.length ? 'Deselect all' : 'Select all'}
-                          </button>
-                        </div>
-                        <div className="tmpl-sections">
-                          {activeBrand.pageTemplate.map((sec, i) => {
-                            const checked = selectedSections.includes(sec.id);
-                            return (
-                              <div key={sec.id} className={`tmpl-row${checked?' checked':''}`} onClick={() => setSelectedSections(prev => prev.includes(sec.id) ? prev.filter(x=>x!==sec.id) : [...prev, sec.id])}>
-                                <div className="tmpl-cb">{checked && <IcoOk />}</div>
-                                <div className="tmpl-num">{i+1}</div>
-                                <div className="tmpl-name">{sec.name || 'Unnamed section'}</div>
-                                <div className="tmpl-type-badge">{sec.type==='faq'?`FAQ ×${activeBrand.faqCount||5}`:sec.type}</div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </>
-                    ) : (
-                      <div className="no-tmpl-banner">
-                        No page template set for this brand.
-                        <button className="no-tmpl-btn" onClick={() => { setView('brands'); setEditingBrand(activeBrand); setShowBrandForm(true); }}>Set up template →</button>
-                      </div>
-                    )}
-
-                    {/* ── IMAGE PROMPTS CONFIGURATOR ── */}
-                    <div className="field-sep" />
-                    <div className={`img-cfg-${imgEnabled ? 'enabled' : 'disabled'}`}>
-                      <div className="img-cfg-header">
-                        <div>
-                          <div className="img-cfg-label">Lovart Image Prompts</div>
-                          <div className="img-cfg-sub">{imgEnabled ? `${imgShots.length} shot${imgShots.length !== 1 ? 's' : ''} configured` : 'Disabled — no image prompts will be generated'}</div>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          {imgEnabled && (
-                            <div className="qty-stepper">
-                              <button className="qty-btn" onClick={() => imgShots.length > 1 && removeShot(imgShots[imgShots.length - 1].id)} disabled={imgShots.length <= 1}>−</button>
-                              <div className="qty-val">{imgShots.length}</div>
-                              <button className="qty-btn" onClick={() => addShot('auto')} disabled={imgShots.length >= 10}>+</button>
-                            </div>
-                          )}
-                          <label className="toggle-sw">
-                            <input type="checkbox" checked={imgEnabled} onChange={e => setImgEnabled(e.target.checked)} />
-                            <div className="toggle-track" />
-                            <div className="toggle-thumb" />
-                          </label>
-                        </div>
+                      {/* Product Title toggle */}
+                      <div className={`tmpl-row${inclTitle?' checked':''}`} onClick={() => setInclTitle(v=>!v)} style={{marginBottom:10}}>
+                        <div className="tmpl-cb">{inclTitle && <IcoOk />}</div>
+                        <div className="tmpl-name">Product Title</div>
+                        <div className="tmpl-type-badge">+ pain point</div>
                       </div>
 
-                      {imgEnabled && (
+                      {/* Template sections */}
+                      {activeBrand?.pageTemplate?.length > 0 ? (
                         <>
-                          <div className="shot-slots">
-                            {imgShots.map((shot, i) => {
-                              const typeInfo = SHOT_TYPES.find(t => t.id === shot.type) || SHOT_TYPES[0];
+                          <div style={{fontSize:'.62rem',fontWeight:700,textTransform:'uppercase',letterSpacing:'.09em',color:'#94a3b8',marginBottom:6,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 2px'}}>
+                            Page Sections — {activeBrand.name}
+                            <button style={{fontSize:'.74rem',fontWeight:600,color:'#2563eb',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit',textTransform:'none',letterSpacing:0}} onClick={() => {
+                              const tmpl = activeBrand.pageTemplate;
+                              setSelectedSections(selectedSections.length === tmpl.length ? [] : tmpl.map(s=>s.id));
+                            }}>
+                              {selectedSections.length === activeBrand.pageTemplate.length ? 'Deselect all' : 'Select all'}
+                            </button>
+                          </div>
+                          <div className="tmpl-sections">
+                            {activeBrand.pageTemplate.map((sec, i) => {
+                              const checked = selectedSections.includes(sec.id);
                               return (
-                                <div key={shot.id} className="shot-slot">
-                                  <div className="shot-num">{i + 1}</div>
-                                  <div className="shot-type-wrap">
-                                    <select
-                                      className={`shot-type-select${shot.type === 'auto' ? ' is-auto' : ''}`}
-                                      value={shot.type}
-                                      onChange={e => setShotType(shot.id, e.target.value)}
-                                    >
-                                      {SHOT_TYPES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
-                                    </select>
-                                  </div>
-                                  <div className="shot-desc">{typeInfo.desc}</div>
-                                  <button className="shot-remove" onClick={() => removeShot(shot.id)} disabled={imgShots.length <= 1} title="Remove slot">×</button>
+                                <div key={sec.id} className={`tmpl-row${checked?' checked':''}`} onClick={() => setSelectedSections(prev => prev.includes(sec.id) ? prev.filter(x=>x!==sec.id) : [...prev, sec.id])}>
+                                  <div className="tmpl-cb">{checked && <IcoOk />}</div>
+                                  <div className="tmpl-num">{i+1}</div>
+                                  <div className="tmpl-name">{sec.name || 'Unnamed section'}</div>
+                                  <div className="tmpl-type-badge">{sec.type==='faq'?`FAQ ×${activeBrand.faqCount||5}`:sec.type}</div>
                                 </div>
                               );
                             })}
                           </div>
-                          <div className="shot-add-row">
-                            <span style={{ fontSize: '.72rem', color: '#94a3b8', fontWeight: 600, alignSelf: 'center' }}>Quick add:</span>
-                            {SHOT_TYPES.filter(t => t.id !== 'auto' && !imgShots.some(s => s.type === t.id)).slice(0, 5).map(t => (
-                              <button key={t.id} className="shot-quick-tag" onClick={() => addShot(t.id)} disabled={imgShots.length >= 10}>+ {t.label}</button>
-                            ))}
-                          </div>
                         </>
+                      ) : (
+                        <div className="no-tmpl-banner">
+                          No page template set for this brand.
+                          <button className="no-tmpl-btn" onClick={() => { setView('brands'); setEditingBrand(activeBrand); setShowBrandForm(true); }}>Set up template →</button>
+                        </div>
                       )}
-                    </div>
 
-                    <div className="gen-row">
-                      {(() => {
-                        const hasTemplate = activeBrand?.pageTemplate?.length > 0;
-                        const contentCount = hasTemplate ? selectedSections.length : 0;
-                        const total = (inclTitle?1:0) + (contentCount>0?contentCount:0) + (imgEnabled&&imgShots.length>0?1:0);
-                        return (
-                          <button className="btn-primary" onClick={generate} disabled={loading || !activeBrand || total === 0}>
-                            <IcoSpark />{loading ? 'Generating…' : `Generate${total > 0 ? ` (${total} item${total!==1?'s':''})` : ''}`}
-                          </button>
-                        );
-                      })()}
+
+
+                      <div className="field-sep" />
+
+                      {/* Image Prompts Configurator */}
+                      <div className={`img-cfg-${imgEnabled ? 'enabled' : 'disabled'}`}>
+                        <div className="img-cfg-header">
+                          <div>
+                            <div className="img-cfg-label">Lovart Image Prompts</div>
+                            <div className="img-cfg-sub">{imgEnabled ? `${imgShots.length} shot${imgShots.length !== 1 ? 's' : ''} configured` : 'Disabled'}</div>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            {imgEnabled && (
+                              <div className="qty-stepper">
+                                <button className="qty-btn" onClick={() => imgShots.length > 1 && removeShot(imgShots[imgShots.length - 1].id)} disabled={imgShots.length <= 1}>−</button>
+                                <div className="qty-val">{imgShots.length}</div>
+                                <button className="qty-btn" onClick={() => addShot('auto')} disabled={imgShots.length >= 10}>+</button>
+                              </div>
+                            )}
+                            <label className="toggle-sw">
+                              <input type="checkbox" checked={imgEnabled} onChange={e => setImgEnabled(e.target.checked)} />
+                              <div className="toggle-track" />
+                              <div className="toggle-thumb" />
+                            </label>
+                          </div>
+                        </div>
+                        {imgEnabled && (
+                          <>
+                            <div className="shot-slots">
+                              {imgShots.map((shot, i) => {
+                                const typeInfo = SHOT_TYPES.find(t => t.id === shot.type) || SHOT_TYPES[0];
+                                return (
+                                  <div key={shot.id} className="shot-slot">
+                                    <div className="shot-num">{i + 1}</div>
+                                    <div className="shot-type-wrap">
+                                      <select className={`shot-type-select${shot.type === 'auto' ? ' is-auto' : ''}`} value={shot.type} onChange={e => setShotType(shot.id, e.target.value)}>
+                                        {SHOT_TYPES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+                                      </select>
+                                    </div>
+                                    <div className="shot-desc">{typeInfo.desc}</div>
+                                    <button className="shot-remove" onClick={() => removeShot(shot.id)} disabled={imgShots.length <= 1}>×</button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            <div className="shot-add-row">
+                              <span style={{ fontSize: '.72rem', color: '#94a3b8', fontWeight: 600, alignSelf: 'center' }}>Quick add:</span>
+                              {SHOT_TYPES.filter(t => t.id !== 'auto' && !imgShots.some(s => s.type === t.id)).slice(0, 4).map(t => (
+                                <button key={t.id} className="shot-quick-tag" onClick={() => addShot(t.id)} disabled={imgShots.length >= 10}>+ {t.label}</button>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </>
+                </div>
               )}
 
               {status && <div className="status-bar"><div className="spin" />{status}</div>}
