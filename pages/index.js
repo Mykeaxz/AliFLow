@@ -6,10 +6,12 @@ const ls = {
   get: (k, fb) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fb; } catch { return fb; } },
   set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
 };
-const loadBrands = () => ls.get('aliflow_brands', []);
-const saveBrands = (v) => ls.set('aliflow_brands', v);
-const loadActiveBrand = () => ls.get('aliflow_active_brand', null);
-const saveActiveBrand = (v) => ls.set('aliflow_active_brand', v);
+// All keys scoped to workspace so each user has isolated data
+const wsKey          = (p, k) => `af:${p}:${k}`;
+const loadBrands     = (p) => ls.get(wsKey(p, 'brands'), []);
+const saveBrands     = (p, v) => ls.set(wsKey(p, 'brands'), v);
+const loadActiveBrand = (p) => ls.get(wsKey(p, 'active_brand'), null);
+const saveActiveBrand = (p, v) => ls.set(wsKey(p, 'active_brand'), v);
 
 // ─── Icons ──────────────────────────────────────────────────────
 const IcoCopy = () => (
@@ -131,6 +133,51 @@ function BrandForm({ initial, onSave, onCancel }) {
   );
 }
 
+// ─── Login Screen ───────────────────────────────────────────────
+function LoginScreen({ onLogin }) {
+  const [name, setName] = useState('');
+  const go = () => { const n = name.trim(); if (n) onLogin(n); };
+  return (
+    <div className="login-wrap">
+      <style>{`
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+        .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f8fafc}
+        .login-card{background:#fff;border:1.5px solid #e2e8f0;border-radius:16px;padding:40px;width:100%;max-width:380px;box-shadow:0 4px 24px rgba(15,23,42,.08);text-align:center}
+        .login-logo{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:28px}
+        .login-logo-dot{width:10px;height:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:50%}
+        .login-logo-text{font-size:1.3rem;font-weight:800;letter-spacing:-.03em}
+        .login-title{font-size:1rem;font-weight:700;color:#0f172a;margin-bottom:6px}
+        .login-sub{font-size:.84rem;color:#64748b;margin-bottom:24px}
+        .login-input{width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:.9rem;font-family:inherit;color:#0f172a;outline:none;transition:border .15s;text-align:center;margin-bottom:12px}
+        .login-input:focus{border-color:#6366f1}
+        .login-input::placeholder{color:#cbd5e1}
+        .login-btn{width:100%;padding:12px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:9px;font-size:.9rem;font-weight:700;cursor:pointer;opacity:1;transition:opacity .15s}
+        .login-btn:hover{opacity:.9}
+        .login-hint{font-size:.76rem;color:#cbd5e1;margin-top:14px}
+      `}</style>
+      <div className="login-card">
+        <div className="login-logo">
+          <div className="login-logo-dot" />
+          <div className="login-logo-text">AliFlow</div>
+        </div>
+        <div className="login-title">Enter your workspace name</div>
+        <div className="login-sub">Each workspace is fully separate — your brands and generations stay private to you.</div>
+        <input
+          className="login-input"
+          placeholder="e.g. Myke, Kopflo, Store2…"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && go()}
+          autoFocus
+        />
+        <button className="login-btn" onClick={go} disabled={!name.trim()}>Enter workspace</button>
+        <div className="login-hint">No password needed — your data is stored locally on this device.</div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Result Section ──────────────────────────────────────────────
 function Section({ title, children, copyText }) {
   return (
@@ -146,6 +193,7 @@ function Section({ title, children, copyText }) {
 
 // ─── MAIN APP ───────────────────────────────────────────────────
 export default function App() {
+  const [profile, setProfile] = useState(null);
   const [brands, setBrands] = useState([]);
   const [activeBrandId, setActiveBrandId] = useState(null);
   const [view, setView] = useState('generate');
@@ -161,29 +209,37 @@ export default function App() {
   const [selectedImg, setSelectedImg] = useState(null);
   const runIdRef = useRef(null);
 
+  // Load profile from localStorage on mount
+  useEffect(() => { const p = ls.get('aliflow_profile', null); if (p) setProfile(p); }, []);
+
+  // Load workspace data when profile is set
   useEffect(() => {
-    const b = loadBrands();
+    if (!profile) return;
+    const b = loadBrands(profile);
     setBrands(b);
-    const a = loadActiveBrand();
+    const a = loadActiveBrand(profile);
     if (a && b.find(x => x.id === a)) setActiveBrandId(a);
-    else if (b.length > 0) { setActiveBrandId(b[0].id); saveActiveBrand(b[0].id); }
-  }, []);
+    else if (b.length > 0) { setActiveBrandId(b[0].id); saveActiveBrand(profile, b[0].id); }
+  }, [profile]);
+
+  const login = (name) => { ls.set('aliflow_profile', name); setProfile(name); };
+  const logout = () => { ls.set('aliflow_profile', null); setProfile(null); setBrands([]); setActiveBrandId(null); };
 
   const activeBrand = brands.find(b => b.id === activeBrandId) || null;
 
   const saveBrand = (brand) => {
     const exists = brands.find(b => b.id === brand.id);
     const next = exists ? brands.map(b => b.id === brand.id ? brand : b) : [...brands, brand];
-    setBrands(next); saveBrands(next);
-    setActiveBrandId(brand.id); saveActiveBrand(brand.id);
+    setBrands(next); saveBrands(profile, next);
+    setActiveBrandId(brand.id); saveActiveBrand(profile, brand.id);
     setShowBrandForm(false); setEditingBrand(null);
   };
 
   const deleteBrand = (id) => {
     if (!confirm('Delete this brand?')) return;
     const next = brands.filter(b => b.id !== id);
-    setBrands(next); saveBrands(next);
-    if (activeBrandId === id) { const n = next[0]?.id || null; setActiveBrandId(n); saveActiveBrand(n); }
+    setBrands(next); saveBrands(profile, next);
+    if (activeBrandId === id) { const n = next[0]?.id || null; setActiveBrandId(n); saveActiveBrand(profile, n); }
   };
 
   const generate = async () => {
@@ -222,6 +278,9 @@ export default function App() {
   };
 
   const reset = () => { setUrl(''); setNotes(''); setResult(null); setImages([]); setError(''); setStatus(''); };
+
+  // ── Login screen ──
+  if (!profile) return <LoginScreen onLogin={login} />;
 
   return (
     <>
@@ -353,6 +412,22 @@ export default function App() {
         .img-modal{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
         .img-modal img{max-width:100%;max-height:90vh;border-radius:10px;object-fit:contain}
         .img-modal-close{position:absolute;top:20px;right:20px;background:rgba(255,255,255,.15);border:none;color:#fff;width:36px;height:36px;border-radius:50%;font-size:1.3rem;cursor:pointer;line-height:1}
+        .ws-pill{padding:4px 10px;background:#f1f5f9;border-radius:20px;font-size:.74rem;font-weight:700;color:#64748b;border:1.5px solid #e2e8f0}
+        .btn-logout{padding:5px 12px;background:none;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.76rem;font-weight:600;color:#94a3b8;cursor:pointer;transition:all .15s}
+        .btn-logout:hover{border-color:#fecaca;color:#dc2626}
+        .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f8fafc}
+        .login-card{background:#fff;border:1.5px solid #e2e8f0;border-radius:16px;padding:40px;width:100%;max-width:400px;box-shadow:0 4px 24px rgba(15,23,42,.08);text-align:center}
+        .login-logo{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:24px}
+        .login-logo-dot{width:10px;height:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:50%}
+        .login-logo-text{font-size:1.3rem;font-weight:800;letter-spacing:-.03em}
+        .login-title{font-size:1rem;font-weight:700;color:#0f172a;margin-bottom:6px}
+        .login-sub{font-size:.84rem;color:#64748b;margin-bottom:24px}
+        .login-input{width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:.9rem;font-family:inherit;color:#0f172a;outline:none;transition:border .15s;text-align:center;margin-bottom:12px}
+        .login-input:focus{border-color:#6366f1}
+        .login-input::placeholder{color:#cbd5e1}
+        .login-btn{width:100%;padding:12px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:9px;font-size:.9rem;font-weight:700;cursor:pointer;transition:opacity .15s}
+        .login-btn:hover{opacity:.9}
+        .login-hint{font-size:.76rem;color:#cbd5e1;margin-top:14px}
       `}</style>
 
       <div className="page">
@@ -371,6 +446,8 @@ export default function App() {
               ? <div className="brand-pill" onClick={() => setView('brands')}><div className="bp-dot" />{activeBrand.name}</div>
               : <div className="brand-pill" onClick={() => setView('brands')}>+ Add Brand</div>
             }
+            <div className="ws-pill">{profile}</div>
+            <button className="btn-logout" onClick={logout}>Log out</button>
           </div>
         </div>
 
@@ -544,7 +621,7 @@ export default function App() {
                   </div>
                   <div className="bc-actions">
                     {brand.id !== activeBrandId
-                      ? <button className="btn-sm" onClick={() => { setActiveBrandId(brand.id); saveActiveBrand(brand.id); }}><IcoArrow />Use</button>
+                      ? <button className="btn-sm" onClick={() => { setActiveBrandId(brand.id); saveActiveBrand(profile, brand.id); }}><IcoArrow />Use</button>
                       : <button className="btn-sm is-active">Active</button>
                     }
                     <button className="btn-sm" onClick={() => { setEditingBrand(brand); setShowBrandForm(true); }}><IcoEdit />Edit</button>
