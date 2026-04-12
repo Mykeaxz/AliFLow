@@ -86,7 +86,7 @@ function BrandForm({ initial, onSave, onCancel }) {
       <div className="bf-grid">
         <div className="bf-row">
           <label>Brand Name *</label>
-          <input className="bf-input" placeholder="e.g. Kopflo" value={form.name} onChange={e => set('name', e.target.value)} />
+          <input className="bf-input" placeholder="Brand name" value={form.name} onChange={e => set('name', e.target.value)} />
         </div>
         <div className="bf-row">
           <label>Tagline</label>
@@ -165,7 +165,7 @@ function LoginScreen({ onLogin }) {
         <div className="login-sub">Each workspace is fully separate — your brands and generations stay private to you.</div>
         <input
           className="login-input"
-          placeholder="e.g. Myke, Kopflo, Store2…"
+          placeholder="Your name or workspace…"
           value={name}
           onChange={e => setName(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && go()}
