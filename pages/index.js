@@ -12,13 +12,36 @@ const saveBrands      = (p, v) => ls.set(wsKey(p, 'brands'), v);
 const loadActiveBrand = (p) => ls.get(wsKey(p, 'active_brand'), null);
 const saveActiveBrand = (p, v) => ls.set(wsKey(p, 'active_brand'), v);
 
-// ── Generation options (content sections — no image prompts here) ──
-const GEN_OPTIONS = [
-  { id: 'productName', label: 'Product Title',  desc: 'Branded name + core pain point' },
-  { id: 'pricing',     label: 'Pricing',         desc: 'AliExpress → retail → sale price' },
-  { id: 'copy',        label: 'Full Copy',        desc: 'Subtitle, overview, materials, care' },
-  { id: 'faq',         label: 'FAQ',              desc: '5 objection-killing Q&As' },
-];
+// ── Page template presets ─────────────────────────────────────────
+const PAGE_PRESETS = {
+  shopify: [
+    { name: 'Hero Subtitle',     type: 'text',     description: 'One punchy line under the product name. Lead with benefit, not feature.' },
+    { name: 'Short Description', type: 'textarea', description: '2-3 sentences. Open with the customer pain. Close with the outcome.' },
+    { name: 'Overview',          type: 'textarea', description: '3-4 paragraphs in brand tone. Sell the transformation, not the specs.' },
+    { name: 'Key Features',      type: 'bullets',  description: '5-7 bullet points. Start each with a benefit, end with the proof.' },
+    { name: 'Materials & Specs', type: 'bullets',  description: 'Factual bullet list of materials, dimensions, weight, compatibility.' },
+    { name: 'Care Instructions', type: 'text',     description: 'Simple care or usage instructions. Keep it short and reassuring.' },
+    { name: 'FAQ',               type: 'faq',      description: 'Objection-killing Q&As. Address shipping, returns, sizing, and doubts.' },
+  ],
+  minimal: [
+    { name: 'Subtitle',          type: 'text',     description: 'One punchy line under the product name.' },
+    { name: 'Short Description', type: 'textarea', description: '2-3 sentences leading with the customer pain.' },
+    { name: 'Key Features',      type: 'bullets',  description: '4-5 benefit-led bullet points.' },
+  ],
+  full: [
+    { name: 'Hero Subtitle',     type: 'text',     description: 'One punchy line under the product name.' },
+    { name: 'Short Description', type: 'textarea', description: '2-3 sentences. Open with pain, close with outcome.' },
+    { name: 'Full Overview',     type: 'textarea', description: '4-5 paragraphs. Sell the transformation deeply.' },
+    { name: "What's Included",   type: 'bullets',  description: 'Bullet list of everything in the box.' },
+    { name: 'Materials & Specs', type: 'bullets',  description: 'Materials, dimensions, weight, compatibility.' },
+    { name: 'Why We Love It',    type: 'textarea', description: "1-2 paragraphs from the brand's perspective — personal, warm, honest." },
+    { name: 'Care Instructions', type: 'text',     description: 'Simple care or usage instructions.' },
+    { name: 'Size Guide',        type: 'bullets',  description: 'Sizing info, fit notes, or dimensions. Skip if not relevant.' },
+    { name: 'FAQ',               type: 'faq',      description: 'Objection-killing Q&As for this specific product.' },
+  ],
+};
+const makeSection = (s) => ({ ...s, id: `${Date.now()}-${Math.random().toString(36).slice(2)}` });
+const sectionKey  = (name) => name.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'');
 
 // ── Image prompt shot types ───────────────────────────────────────
 const SHOT_TYPES = [
@@ -299,6 +322,79 @@ input:focus,textarea:focus,select:focus{background:#fff!important;box-shadow:0 0
 .coming-soon-icon{font-size:2.5rem;margin-bottom:12px}
 .coming-soon-title{font-size:1rem;font-weight:700;color:#334155;margin-bottom:6px}
 .coming-soon-desc{font-size:.84rem}
+
+/* ── PAGE TEMPLATE BUILDER ── */
+.pt-presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.pt-preset{padding:5px 14px;border-radius:999px;border:1.5px solid #e2e8f0;background:#f8fafc;font-size:.76rem;font-weight:600;color:#475569;cursor:pointer;font-family:inherit;transition:all .12s}
+.pt-preset:hover{border-color:#bfdbfe;background:#eff6ff;color:#1d4ed8}
+.pt-empty{text-align:center;padding:20px;border:1.5px dashed #e2e8f0;border-radius:10px;color:#94a3b8;font-size:.82rem}
+.pt-list{display:flex;flex-direction:column;gap:6px}
+.pt-section{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;transition:border-color .12s}
+.pt-section:hover{border-color:#bfdbfe}
+.pt-row{display:flex;align-items:center;gap:8px}
+.pt-num{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff;font-size:.6rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pt-name{flex:1;padding:6px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.84rem;font-family:inherit;color:#0f172a;background:#fff;outline:none;transition:all .12s}
+.pt-name:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+.pt-type{padding:6px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.8rem;font-family:inherit;color:#334155;background:#fff;outline:none;cursor:pointer;transition:all .12s}
+.pt-type:focus{border-color:#3b82f6}
+.pt-arrows{display:flex;flex-direction:column;gap:1px;flex-shrink:0}
+.pt-arrow{width:20px;height:15px;border:1px solid #e2e8f0;border-radius:3px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.55rem;color:#94a3b8;transition:all .1s;line-height:1}
+.pt-arrow:hover:not(:disabled){background:#f1f5f9;color:#475569;border-color:#cbd5e1}
+.pt-arrow:disabled{opacity:.25;cursor:not-allowed}
+.pt-desc{width:100%;margin-top:6px;padding:6px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.77rem;font-family:inherit;color:#475569;background:#fff;outline:none;resize:none;transition:all .12s}
+.pt-desc:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+.pt-desc::placeholder{color:#cbd5e1}
+.pt-remove{width:24px;height:24px;border:none;border-radius:5px;background:none;cursor:pointer;color:#cbd5e1;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .1s;flex-shrink:0;line-height:1}
+.pt-remove:hover{background:#fef2f2;color:#ef4444}
+.pt-add{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;border:1.5px dashed #bfdbfe;border-radius:9px;background:none;color:#2563eb;font-size:.8rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .12s;width:100%}
+.pt-add:hover{background:#eff6ff;border-color:#3b82f6}
+.faq-count-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:9px;margin-top:2px}
+.faq-count-label{font-size:.8rem;font-weight:600;color:#1d4ed8;flex:1}
+
+/* ── PRICE CALCULATOR ── */
+.calc-card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;margin-bottom:14px;overflow:hidden;box-shadow:0 2px 12px rgba(15,23,42,.06)}
+.calc-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;user-select:none;transition:background .1s}
+.calc-header:hover{background:#fafbfd}
+.calc-header-left{display:flex;align-items:center;gap:10px}
+.calc-icon{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#0891b2,#06b6d4);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.calc-title{font-size:.88rem;font-weight:700;color:#0f172a}
+.calc-sub{font-size:.72rem;color:#94a3b8;margin-top:1px}
+.calc-chevron{color:#94a3b8;transition:transform .2s;font-size:.7rem}
+.calc-chevron.open{transform:rotate(180deg)}
+.calc-body{padding:16px 18px 18px;border-top:1px solid #f1f5f9}
+.calc-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.calc-label{font-size:.76rem;font-weight:600;color:#475569;white-space:nowrap;min-width:60px}
+.calc-cost{width:120px;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.95rem;font-weight:700;font-family:inherit;color:#0f172a;background:#f8fafc;outline:none;transition:all .15s}
+.calc-cost:focus{border-color:#0891b2;background:#fff;box-shadow:0 0 0 3px rgba(8,145,178,.1)}
+.calc-currency{font-size:.78rem;color:#94a3b8;font-weight:600}
+.mult-btns{display:flex;gap:4px;flex-wrap:wrap}
+.mult-btn{padding:6px 13px;border-radius:7px;border:1.5px solid #e2e8f0;background:#f8fafc;font-size:.8rem;font-weight:700;color:#475569;cursor:pointer;font-family:inherit;transition:all .12s}
+.mult-btn:hover{border-color:#bfdbfe;color:#1d4ed8;background:#eff6ff}
+.mult-btn.active{background:#1d4ed8;border-color:#1d4ed8;color:#fff}
+.mult-custom{width:64px;padding:6px 8px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.8rem;font-weight:700;font-family:inherit;color:#0f172a;background:#f8fafc;outline:none;text-align:center;transition:all .12s}
+.mult-custom:focus{border-color:#3b82f6;background:#fff}
+.calc-results{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px}
+.calc-cell{background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:10px 12px}
+.calc-cell.hi{background:linear-gradient(135deg,#eff6ff,#e0f2fe);border-color:#bfdbfe}
+.calc-cell-label{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:3px}
+.calc-cell-val{font-size:1.05rem;font-weight:800;color:#0f172a}
+.calc-cell.hi .calc-cell-val{color:#1d4ed8}
+.calc-cell-sub{font-size:.68rem;color:#94a3b8;margin-top:2px}
+
+/* ── TEMPLATE SECTION TOGGLES (in generate view) ── */
+.tmpl-sections{display:flex;flex-direction:column;gap:6px;margin-bottom:4px}
+.tmpl-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:9px;cursor:pointer;transition:all .12s;background:#f8fafc}
+.tmpl-row:hover{border-color:#bfdbfe;background:#eff6ff}
+.tmpl-row.checked{border-color:#3b82f6;background:#eff6ff}
+.tmpl-cb{width:17px;height:17px;border:2px solid #cbd5e1;border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.tmpl-row.checked .tmpl-cb{background:#2563eb;border-color:#2563eb;color:#fff}
+.tmpl-num{font-size:.62rem;font-weight:800;color:#94a3b8;min-width:16px}
+.tmpl-row.checked .tmpl-num{color:#2563eb}
+.tmpl-name{font-size:.84rem;font-weight:700;color:#0f172a;flex:1}
+.tmpl-type-badge{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:4px;background:#f1f5f9;color:#94a3b8}
+.tmpl-row.checked .tmpl-type-badge{background:#dbeafe;color:#2563eb}
+.no-tmpl-banner{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;font-size:.84rem;color:#1d4ed8;display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.no-tmpl-btn{margin-left:auto;background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0}
 `;
 
 // ── LoginScreen ───────────────────────────────────────────────────
@@ -345,7 +441,7 @@ function LoginScreen({ onLogin }) {
 }
 
 // ── BrandForm ─────────────────────────────────────────────────────
-const EMPTY_BRAND = { id: '', name: '', tagline: '', niche: '', story: '', targetCustomer: '', tone: '', keyBenefits: '', alwaysEmphasise: '', copyRules: '', forbiddenWords: '', currency: 'AUD', priceMin: '', priceMax: '', priceMultiplier: '4', competitorContext: '', imageStyle: '', colorBg: '#ffffff', colorAccent: '#000000', colorText: '#000000' };
+const EMPTY_BRAND = { id: '', name: '', tagline: '', niche: '', story: '', targetCustomer: '', tone: '', keyBenefits: '', alwaysEmphasise: '', copyRules: '', forbiddenWords: '', currency: 'AUD', priceMin: '', priceMax: '', priceMultiplier: '4', competitorContext: '', imageStyle: '', colorBg: '#ffffff', colorAccent: '#000000', colorText: '#000000', pageTemplate: [], faqCount: 5 };
 
 function BrandForm({ initial, onSave, onCancel }) {
   const [form, setForm] = useState(initial || EMPTY_BRAND);
@@ -451,11 +547,144 @@ function BrandForm({ initial, onSave, onCancel }) {
         </div>
       </div>
 
+      <div className="bf-section-title">Product Page Template</div>
+      <div style={{fontSize:'.78rem',color:'#64748b',marginBottom:8}}>Build your page section by section — in the exact order they appear on your store. Claude will generate content for each one.</div>
+      <div className="pt-presets">
+        <span style={{fontSize:'.72rem',fontWeight:600,color:'#94a3b8',alignSelf:'center'}}>Load preset:</span>
+        {[['shopify','Shopify Standard'],['minimal','Minimal'],['full','Full Store']].map(([key,label]) => (
+          <button key={key} className="pt-preset" onClick={() => set('pageTemplate', PAGE_PRESETS[key].map(makeSection))}>{label}</button>
+        ))}
+        {form.pageTemplate.length > 0 && <button className="pt-preset" style={{color:'#dc2626',borderColor:'#fecaca'}} onClick={() => set('pageTemplate',[])}>Clear</button>}
+      </div>
+
+      {form.pageTemplate.length === 0
+        ? <div className="pt-empty">No sections yet — load a preset or add your own below.</div>
+        : <div className="pt-list">
+            {form.pageTemplate.map((sec, i) => (
+              <div key={sec.id} className="pt-section">
+                <div className="pt-row">
+                  <div className="pt-arrows">
+                    <button className="pt-arrow" disabled={i===0} onClick={() => { const t=[...form.pageTemplate]; [t[i-1],t[i]]=[t[i],t[i-1]]; set('pageTemplate',t); }}>▲</button>
+                    <button className="pt-arrow" disabled={i===form.pageTemplate.length-1} onClick={() => { const t=[...form.pageTemplate]; [t[i],t[i+1]]=[t[i+1],t[i]]; set('pageTemplate',t); }}>▼</button>
+                  </div>
+                  <div className="pt-num">{i+1}</div>
+                  <input className="pt-name" placeholder="Section name" value={sec.name} onChange={e => set('pageTemplate', form.pageTemplate.map((s,j) => j===i ? {...s, name:e.target.value} : s))} />
+                  <select className="pt-type" value={sec.type} onChange={e => set('pageTemplate', form.pageTemplate.map((s,j) => j===i ? {...s, type:e.target.value} : s))}>
+                    <option value="text">Short text</option>
+                    <option value="textarea">Long copy</option>
+                    <option value="bullets">Bullet list</option>
+                    <option value="faq">FAQ (Q&amp;As)</option>
+                  </select>
+                  <button className="pt-remove" onClick={() => set('pageTemplate', form.pageTemplate.filter((_,j) => j!==i))}>×</button>
+                </div>
+                <textarea className="pt-desc" rows={1} placeholder="Instructions for Claude — what goes here? e.g. 2-3 sentences leading with the customer pain..." value={sec.description} onChange={e => set('pageTemplate', form.pageTemplate.map((s,j) => j===i ? {...s, description:e.target.value} : s))} />
+              </div>
+            ))}
+          </div>
+      }
+      <button className="pt-add" onClick={() => set('pageTemplate', [...form.pageTemplate, makeSection({name:'',type:'text',description:''})])}>
+        <IcoPlus /> Add section
+      </button>
+
+      {form.pageTemplate.some(s => s.type === 'faq') && (
+        <div className="faq-count-row">
+          <div className="faq-count-label">Number of FAQ pairs to generate</div>
+          <div className="qty-stepper">
+            <button className="qty-btn" onClick={() => set('faqCount', Math.max(1, (form.faqCount||5)-1))}>−</button>
+            <div className="qty-val">{form.faqCount||5}</div>
+            <button className="qty-btn" onClick={() => set('faqCount', Math.min(20, (form.faqCount||5)+1))}>+</button>
+          </div>
+        </div>
+      )}
+
       {err && <div className="bf-err">{err}</div>}
       <div className="bf-actions">
         {onCancel && <button className="btn-ghost" onClick={onCancel}>Cancel</button>}
         <button className="btn-primary" onClick={save}>Save Brand</button>
       </div>
+    </div>
+  );
+}
+
+// ── PriceCalculator ───────────────────────────────────────────────
+function PriceCalculator({ currency }) {
+  const [open, setOpen]   = useState(false);
+  const [cost, setCost]   = useState('');
+  const [mult, setMult]   = useState(4);
+  const [custom, setCustom] = useState('');
+
+  const activeMult = custom ? parseFloat(custom) || 0 : mult;
+  const cur        = currency || 'AUD';
+  const fmt        = (n) => isNaN(n) || !isFinite(n) ? '—' : `${cur} ${n.toFixed(2)}`;
+
+  const calcRetail = (c, m) => {
+    if (!c || !m) return NaN;
+    const raw = parseFloat(c) * m;
+    if (isNaN(raw) || raw <= 0) return NaN;
+    // Round to nearest nice .95 ending
+    const rounded = Math.ceil(raw / 5) * 5 - 0.05;
+    return rounded < raw ? rounded + 5 : rounded;
+  };
+
+  const retail   = calcRetail(cost, activeMult);
+  const sale20   = isNaN(retail) ? NaN : retail * 0.80;
+  const sale30   = isNaN(retail) ? NaN : retail * 0.70;
+  const margin   = isNaN(retail) || !cost ? NaN : ((retail - parseFloat(cost)) / retail * 100);
+
+  return (
+    <div className="calc-card">
+      <div className="calc-header" onClick={() => setOpen(o => !o)}>
+        <div className="calc-header-left">
+          <div className="calc-icon">
+            <svg width="14" height="14" viewBox="0 0 15 15" fill="none"><path d="M2 4h11M2 7.5h7M2 11h5M11 8v5M8.5 10.5h5" stroke="rgba(255,255,255,.9)" strokeWidth="1.5" strokeLinecap="round"/></svg>
+          </div>
+          <div>
+            <div className="calc-title">Price Calculator</div>
+            <div className="calc-sub">Instant markup calculator — no Claude needed</div>
+          </div>
+        </div>
+        <span className={`calc-chevron${open?' open':''}`}>▼</span>
+      </div>
+      {open && (
+        <div className="calc-body">
+          <div className="calc-row">
+            <div className="calc-label">Cost price</div>
+            <input className="calc-cost" type="number" min="0" step="0.01" placeholder="0.00" value={cost} onChange={e => setCost(e.target.value)} />
+            <span className="calc-currency">{cur}</span>
+          </div>
+          <div className="calc-row">
+            <div className="calc-label">Multiplier</div>
+            <div className="mult-btns">
+              {[2,3,4,5].map(m => (
+                <button key={m} className={`mult-btn${!custom && mult===m?' active':''}`} onClick={() => { setMult(m); setCustom(''); }}>{m}×</button>
+              ))}
+              <input className="mult-custom" type="number" min="1" step="0.1" placeholder="Custom" value={custom} onChange={e => setCustom(e.target.value)} onFocus={() => setMult(0)} />
+            </div>
+          </div>
+          <div className="calc-results">
+            <div className="calc-cell hi">
+              <div className="calc-cell-label">Retail</div>
+              <div className="calc-cell-val">{fmt(retail)}</div>
+              <div className="calc-cell-sub">{activeMult}× markup</div>
+            </div>
+            <div className="calc-cell">
+              <div className="calc-cell-label">Sale −20%</div>
+              <div className="calc-cell-val">{fmt(sale20)}</div>
+              <div className="calc-cell-sub">20% off retail</div>
+            </div>
+            <div className="calc-cell">
+              <div className="calc-cell-label">Sale −30%</div>
+              <div className="calc-cell-val">{fmt(sale30)}</div>
+              <div className="calc-cell-sub">30% off retail</div>
+            </div>
+            <div className="calc-cell">
+              <div className="calc-cell-label">Gross Margin</div>
+              <div className="calc-cell-val">{isNaN(margin) ? '—' : `${margin.toFixed(0)}%`}</div>
+              <div className="calc-cell-sub">at retail price</div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -594,11 +823,12 @@ export default function App() {
   const [showSettings, setShowSettings]   = useState(false);
 
   // Generate state
-  const [url, setUrl]               = useState('');
-  const [notes, setNotes]           = useState('');
-  const [selections, setSelections] = useState(() => GEN_OPTIONS.map(o => o.id));
-  const [imgEnabled, setImgEnabled] = useState(true);
-  const [imgShots, setImgShots]     = useState(() => DEFAULT_SHOTS.map((t,i) => ({ id: i, type: t })));
+  const [url, setUrl]                       = useState('');
+  const [notes, setNotes]                   = useState('');
+  const [inclTitle, setInclTitle]           = useState(true);
+  const [selectedSections, setSelectedSections] = useState([]); // template section ids
+  const [imgEnabled, setImgEnabled]         = useState(true);
+  const [imgShots, setImgShots]             = useState(() => DEFAULT_SHOTS.map((t,i) => ({ id: i, type: t })));
   const [loading, setLoading]       = useState(false);
   const [status, setStatus]         = useState('');
   const [error, setError]           = useState('');
@@ -616,6 +846,11 @@ export default function App() {
     if (a && b.find(x => x.id === a)) setActiveBrandId(a);
     else if (b.length > 0) { setActiveBrandId(b[0].id); saveActiveBrand(profile, b[0].id); }
   }, [profile]);
+  // Auto-select all template sections when active brand changes
+  useEffect(() => {
+    const brand = brands.find(b => b.id === activeBrandId);
+    if (brand?.pageTemplate?.length) setSelectedSections(brand.pageTemplate.map(s => s.id));
+  }, [activeBrandId, brands]);
 
   const login  = (name) => { ls.set('aliflow_profile', name); setProfile(name); };
   const logout = () => { ls.set('aliflow_profile', null); setProfile(null); setBrands([]); setActiveBrandId(null); setShowSettings(false); };
@@ -643,10 +878,12 @@ export default function App() {
   const setShotType = (id, type) => setImgShots(prev => prev.map(s => s.id === id ? { ...s, type } : s));
 
   const generate = async () => {
-    const allSections = [...selections, ...(imgEnabled && imgShots.length > 0 ? ['imagePrompts'] : [])];
+    const hasTemplate = activeBrand?.pageTemplate?.length > 0;
+    const hasContent  = hasTemplate ? selectedSections.length > 0 : false;
+    const total = (inclTitle ? 1 : 0) + (hasContent ? 1 : 0) + (imgEnabled && imgShots.length > 0 ? 1 : 0);
     if (!url.trim() || !url.includes('aliexpress.com')) return setError('Please paste a valid AliExpress product URL');
     if (!activeBrand) return setError('Set up a brand first');
-    if (allSections.length === 0) return setError('Select at least one thing to generate');
+    if (total === 0) return setError('Select at least one thing to generate');
     setError(''); setLoading(true); setResult(null); setImages([]);
     setStatus('Starting scraper…');
     try {
@@ -670,8 +907,17 @@ export default function App() {
       setProductData({ ...pd, notes });
       setStatus('Generating with Claude…');
 
+      const allSections = [
+        ...(inclTitle ? ['productName'] : []),
+        ...(hasContent ? ['pageContent'] : []),
+        ...(imgEnabled && imgShots.length > 0 ? ['imagePrompts'] : []),
+      ];
       const shotConfig = imgEnabled ? imgShots.map((s, i) => ({ slot: i + 1, type: s.type })) : [];
-      const briefRes = await fetch('/api/brief', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ productData: { ...pd, notes }, brand: activeBrand, selections: allSections, shotConfig }) });
+      const briefRes = await fetch('/api/brief', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productData: { ...pd, notes }, brand: activeBrand, selections: allSections, shotConfig, selectedSections }),
+      });
       const brief = await briefRes.json();
       if (!briefRes.ok) throw new Error(brief.error || 'Generation failed');
       setResult(brief); setStatus('');
@@ -680,6 +926,7 @@ export default function App() {
   };
 
   const updateSection = (key, val) => setResult(prev => ({ ...prev, [key]: val }));
+  const updatePageSection = (secKey, val) => setResult(prev => ({ ...prev, pageContent: { ...prev.pageContent, [secKey]: val } }));
   const reset = () => { setUrl(''); setNotes(''); setResult(null); setImages([]); setError(''); setStatus(''); setProductData(null); setSelectedImg(null); };
 
   if (!profile) return <LoginScreen onLogin={login} />;
@@ -802,25 +1049,52 @@ export default function App() {
                     </div>
                   </div>
 
+                  {/* Price Calculator */}
+                  <PriceCalculator currency={activeBrand?.currency} />
+
                   {/* What to generate card */}
                   <div className="card">
-                    <div className="card-title">
-                      What to generate
-                      <button onClick={() => setSelections(sel => sel.length === GEN_OPTIONS.length ? [] : GEN_OPTIONS.map(o => o.id))}>
-                        {selections.length === GEN_OPTIONS.length ? 'Deselect all' : 'Select all'}
-                      </button>
+                    <div className="card-title">What to generate</div>
+
+                    {/* Always: Product Title toggle */}
+                    <div className={`tmpl-row${inclTitle?' checked':''}`} onClick={() => setInclTitle(v=>!v)} style={{marginBottom:8}}>
+                      <div className="tmpl-cb">{inclTitle && <IcoOk />}</div>
+                      <div className="tmpl-name">Product Title</div>
+                      <div className="tmpl-type-badge">always useful</div>
                     </div>
-                    <div className="gen-opts-grid">
-                      {GEN_OPTIONS.map(opt => (
-                        <div key={opt.id} className={`gen-opt${selections.includes(opt.id) ? ' checked' : ''}`} onClick={() => setSelections(prev => prev.includes(opt.id) ? prev.filter(x => x !== opt.id) : [...prev, opt.id])}>
-                          <div className="gen-opt-cb">{selections.includes(opt.id) && <IcoOk />}</div>
-                          <div>
-                            <div className="gen-opt-label">{opt.label}</div>
-                            <div className="gen-opt-desc">{opt.desc}</div>
-                          </div>
+
+                    {/* Template sections */}
+                    {activeBrand?.pageTemplate?.length > 0 ? (
+                      <>
+                        <div style={{fontSize:'.72rem',fontWeight:700,textTransform:'uppercase',letterSpacing:'.08em',color:'#94a3b8',marginBottom:6,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                          Page Sections
+                          <button style={{fontSize:'.74rem',fontWeight:600,color:'#2563eb',background:'none',border:'none',cursor:'pointer',fontFamily:'inherit',textTransform:'none',letterSpacing:0}} onClick={() => {
+                            const tmpl = activeBrand.pageTemplate;
+                            setSelectedSections(selectedSections.length === tmpl.length ? [] : tmpl.map(s=>s.id));
+                          }}>
+                            {selectedSections.length === activeBrand.pageTemplate.length ? 'Deselect all' : 'Select all'}
+                          </button>
                         </div>
-                      ))}
-                    </div>
+                        <div className="tmpl-sections">
+                          {activeBrand.pageTemplate.map((sec, i) => {
+                            const checked = selectedSections.includes(sec.id);
+                            return (
+                              <div key={sec.id} className={`tmpl-row${checked?' checked':''}`} onClick={() => setSelectedSections(prev => prev.includes(sec.id) ? prev.filter(x=>x!==sec.id) : [...prev, sec.id])}>
+                                <div className="tmpl-cb">{checked && <IcoOk />}</div>
+                                <div className="tmpl-num">{i+1}</div>
+                                <div className="tmpl-name">{sec.name || 'Unnamed section'}</div>
+                                <div className="tmpl-type-badge">{sec.type==='faq'?`FAQ ×${activeBrand.faqCount||5}`:sec.type}</div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="no-tmpl-banner">
+                        No page template set for this brand.
+                        <button className="no-tmpl-btn" onClick={() => { setView('brands'); setEditingBrand(activeBrand); setShowBrandForm(true); }}>Set up template →</button>
+                      </div>
+                    )}
 
                     {/* ── IMAGE PROMPTS CONFIGURATOR ── */}
                     <div className="field-sep" />
@@ -881,10 +1155,12 @@ export default function App() {
 
                     <div className="gen-row">
                       {(() => {
-                        const total = selections.length + (imgEnabled && imgShots.length > 0 ? 1 : 0);
+                        const hasTemplate = activeBrand?.pageTemplate?.length > 0;
+                        const contentCount = hasTemplate ? selectedSections.length : 0;
+                        const total = (inclTitle?1:0) + (contentCount>0?contentCount:0) + (imgEnabled&&imgShots.length>0?1:0);
                         return (
                           <button className="btn-primary" onClick={generate} disabled={loading || !activeBrand || total === 0}>
-                            <IcoSpark />{loading ? 'Generating…' : `Generate${total > 0 ? ` (${total} section${total !== 1 ? 's' : ''})` : ''}`}
+                            <IcoSpark />{loading ? 'Generating…' : `Generate${total > 0 ? ` (${total} item${total!==1?'s':''})` : ''}`}
                           </button>
                         );
                       })()}
@@ -918,45 +1194,29 @@ export default function App() {
                   </div>
 
                   <div className="result-wrap">
-                    {result.pricing && (
-                      <RegenSection title="Pricing" sectionKey="pricing" productData={productData} brand={activeBrand} selections={selections} onUpdate={updateSection}
-                        copyText={`AliExpress: ${result.pricing.aliExpressPrice}\nRetail: ${result.pricing.suggestedRetail}\nSale: ${result.pricing.suggestedSalePrice}\n${result.pricing.reasoning || ''}`}>
-                        <div className="price-grid">
-                          <div className="price-cell"><div className="price-label">AliExpress</div><div className="price-val">{result.pricing.aliExpressPrice}</div></div>
-                          <div className="price-cell"><div className="price-label">Retail</div><div className="price-val">{result.pricing.suggestedRetail}</div></div>
-                          <div className="price-cell"><div className="price-label">Sale Price</div><div className="price-val">{result.pricing.suggestedSalePrice}</div></div>
-                          {result.pricing.reasoning && <div className="price-reason">{result.pricing.reasoning}</div>}
-                        </div>
-                      </RegenSection>
-                    )}
 
-                    {result.copy && (
-                      <RegenSection title="Copy" sectionKey="copy" productData={productData} brand={activeBrand} selections={selections} onUpdate={updateSection}
-                        copyText={Object.values(result.copy).join('\n\n')}>
-                        {result.copy.subtitle && <div className="cf"><div className="cf-label">Subtitle</div><div style={{ fontSize: '1rem', fontWeight: 700 }}>{result.copy.subtitle}</div></div>}
-                        {result.copy.shortDescription && <div className="cf"><div className="cf-label">Short Description</div><div className="cf-val">{result.copy.shortDescription}</div></div>}
-                        {result.copy.overview && <div className="cf"><div className="cf-label">Overview</div><div className="cf-val">{result.copy.overview}</div></div>}
-                        <div className="copy-2col">
-                          {result.copy.materials && <div><div className="cf-label">Materials</div><div className="cf-val" style={{ fontSize: '.84rem' }}>{result.copy.materials}</div></div>}
-                          {result.copy.care && <div><div className="cf-label">Care</div><div className="cf-val" style={{ fontSize: '.84rem' }}>{result.copy.care}</div></div>}
-                        </div>
-                      </RegenSection>
-                    )}
-
-                    {result.faq?.length > 0 && (
-                      <RegenSection title="FAQ" sectionKey="faq" productData={productData} brand={activeBrand} selections={selections} onUpdate={updateSection}
-                        copyText={result.faq.map(f => `Q: ${f.q}\nA: ${f.a}`).join('\n\n')}>
-                        {result.faq.map((f, i) => (
-                          <div key={i} className="faq-item">
-                            <div className="faq-q">Q: {f.q}</div>
-                            <div className="faq-a">{f.a}</div>
-                          </div>
-                        ))}
-                      </RegenSection>
-                    )}
+                    {/* Dynamic page content sections from template */}
+                    {result.pageContent && activeBrand?.pageTemplate?.map(sec => {
+                      const key = sectionKey(sec.name);
+                      const val = result.pageContent[key];
+                      if (val === undefined || val === null) return null;
+                      const copyText = Array.isArray(val)
+                        ? (val[0]?.q ? val.map(f=>`Q: ${f.q}\nA: ${f.a}`).join('\n\n') : val.join('\n'))
+                        : String(val);
+                      return (
+                        <RegenSection key={sec.id} title={sec.name} sectionKey={`pageContent.${key}`} productData={productData} brand={activeBrand} selections={['pageContent']} onUpdate={(_,v)=>updatePageSection(key,v)} copyText={copyText}>
+                          {sec.type === 'faq' && Array.isArray(val)
+                            ? val.map((f,i) => <div key={i} className="faq-item"><div className="faq-q">Q: {f.q}</div><div className="faq-a">{f.a}</div></div>)
+                            : sec.type === 'bullets' && Array.isArray(val)
+                            ? <ul style={{paddingLeft:18,display:'flex',flexDirection:'column',gap:4}}>{val.map((b,i)=><li key={i} style={{fontSize:'.875rem',color:'#1e293b',lineHeight:1.6}}>{b}</li>)}</ul>
+                            : <div className="cf-val">{String(val)}</div>
+                          }
+                        </RegenSection>
+                      );
+                    })}
 
                     {result.imagePrompts && Array.isArray(result.imagePrompts) && result.imagePrompts.length > 0 && (
-                      <RegenSection title="Lovart Image Prompts" sectionKey="imagePrompts" productData={productData} brand={activeBrand} selections={[...selections,'imagePrompts']} onUpdate={updateSection}
+                      <RegenSection title="Lovart Image Prompts" sectionKey="imagePrompts" productData={productData} brand={activeBrand} selections={['imagePrompts']} onUpdate={updateSection}
                         copyText={result.imagePrompts.map((p, i) => `SHOT ${i+1} — ${p.type?.toUpperCase() || ''}\n${p.prompt}`).join('\n\n')}>
                         <div className="prompt-grid">
                           {result.imagePrompts.map((p, i) => (

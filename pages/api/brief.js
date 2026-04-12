@@ -23,41 +23,43 @@ export default async function handler(req, res) {
   const CLAUDE_KEY = process.env.CLAUDE_API_KEY;
   if (!CLAUDE_KEY) return res.status(500).json({ error: 'CLAUDE_API_KEY not set' });
 
+  const { selectedSections } = req.body; // array of template section IDs user checked
+
   // Which sections to generate
-  const toGenerate = selections && selections.length > 0 ? selections : ['productName','pricing','copy','faq','imagePrompts'];
+  const toGenerate = selections && selections.length > 0 ? selections : ['productName','pageContent','imagePrompts'];
+
+  // Helper: turn section name into JSON key
+  const toKey = (name) => name.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'');
 
   // Build output format based on selections
   const outputFields = {};
   if (toGenerate.includes('productName')) {
-    outputFields.productName = 'Branded product name';
+    outputFields.productName = 'Branded product name — make it memorable and on-brand';
     outputFields.painPoint   = '1-2 sentences on the core pain this product solves';
   }
-  if (toGenerate.includes('pricing')) {
-    outputFields.pricing = {
-      aliExpressPrice:    `Estimated AliExpress price in ${brand.currency || 'AUD'}`,
-      suggestedRetail:    `Recommended retail price in ${brand.currency || 'AUD'}`,
-      suggestedSalePrice: '20-30% off retail',
-      reasoning:          'Brief explanation of pricing logic',
-    };
+
+  // Page template content — dynamic per brand's template
+  if (toGenerate.includes('pageContent') && brand.pageTemplate && brand.pageTemplate.length > 0) {
+    const activeSections = selectedSections && selectedSections.length > 0
+      ? brand.pageTemplate.filter(s => selectedSections.includes(s.id))
+      : brand.pageTemplate;
+
+    if (activeSections.length > 0) {
+      outputFields.pageContent = {};
+      for (const sec of activeSections) {
+        const key = toKey(sec.name);
+        const faqCount = brand.faqCount || 5;
+        if (sec.type === 'faq') {
+          outputFields.pageContent[key] = Array(faqCount).fill(null).map(() => ({ q: 'Customer question', a: 'Objection-killing answer' }));
+        } else if (sec.type === 'bullets') {
+          outputFields.pageContent[key] = ['Bullet point', 'Bullet point', 'Bullet point'];
+        } else {
+          outputFields.pageContent[key] = sec.description || `Write the ${sec.name} section in brand tone`;
+        }
+      }
+    }
   }
-  if (toGenerate.includes('copy')) {
-    outputFields.copy = {
-      subtitle:         'One punchy line under the product name',
-      shortDescription: '2-3 sentences. Lead with the customer pain. End with the outcome.',
-      overview:         '3-4 short paragraphs in brand tone.',
-      materials:        'Bullet list of materials/specs',
-      care:             'Simple care or usage instructions',
-    };
-  }
-  if (toGenerate.includes('faq')) {
-    outputFields.faq = [
-      { q: 'Customer question', a: 'Objection-killing answer' },
-      { q: 'Customer question', a: 'Objection-killing answer' },
-      { q: 'Customer question', a: 'Objection-killing answer' },
-      { q: 'Customer question', a: 'Objection-killing answer' },
-      { q: 'Customer question', a: 'Objection-killing answer' },
-    ];
-  }
+
   if (toGenerate.includes('imagePrompts')) {
     // Build shot list from shotConfig or fallback to 6 auto shots
     const shots = shotConfig && shotConfig.length > 0
@@ -68,6 +70,18 @@ export default async function handler(req, res) {
       prompt: `Full Lovart prompt for shot ${s.slot} — ${SHOT_INSTRUCTIONS[s.type] || SHOT_INSTRUCTIONS.auto}`,
     }));
   }
+
+  // Build page template instructions for the system prompt
+  const activeSections = (brand.pageTemplate || []).filter(s =>
+    !selectedSections || selectedSections.length === 0 || selectedSections.includes(s.id)
+  );
+  const templateBlock = activeSections.length > 0
+    ? `\nPRODUCT PAGE TEMPLATE — generate content for each section exactly as specified:\n${activeSections.map((s, i) => {
+        const faqCount = brand.faqCount || 5;
+        const typeNote = s.type === 'faq' ? `(${faqCount} Q&A pairs)` : s.type === 'bullets' ? '(bullet list)' : s.type === 'textarea' ? '(multi-paragraph copy)' : '(short text)';
+        return `${i+1}. "${s.name}" ${typeNote}\n   Instructions: ${s.description || 'Write in brand tone'}`;
+      }).join('\n')}\n`
+    : '';
 
   const systemPrompt = `You are a product copywriter for ${brand.name}${brand.tagline ? ` — ${brand.tagline}` : ''}.
 
@@ -85,8 +99,7 @@ ${brand.keyBenefits ? `KEY BRAND BENEFITS — always weave these in:\n${brand.ke
 ${brand.alwaysEmphasise ? `ALWAYS EMPHASISE — mention these in every piece of copy:\n${brand.alwaysEmphasise}\n` : ''}
 ${brand.copyRules ? `COPY RULES — follow strictly:\n${brand.copyRules}\n` : ''}
 ${brand.forbiddenWords ? `FORBIDDEN WORDS — never use any of these:\n${brand.forbiddenWords}\n` : ''}
-${brand.competitorContext ? `COMPETITOR CONTEXT:\n${brand.competitorContext}\n` : ''}
-
+${brand.competitorContext ? `COMPETITOR CONTEXT:\n${brand.competitorContext}\n` : ''}${templateBlock}
 PRICING RULES:
 - Currency: ${brand.currency || 'AUD'}
 - Retail price = ~${brand.priceMultiplier || 4}x the AliExpress cost price
