@@ -87,7 +87,7 @@ function BrandForm({ initial, onSave, onCancel }) {
         <div className="bf-row">
           <label>Currency</label>
           <select className="bf-input" value={form.currency} onChange={e => set('currency', e.target.value)}>
-            {['AUD','USD','GBP','EUR','CAD','NZD','SGD'].map(c => <option key={c}>{c}</option>)}
+            {['AUD','USD','EUR'].map(c => <option key={c}>{c}</option>)}
           </select>
         </div>
       </div>
